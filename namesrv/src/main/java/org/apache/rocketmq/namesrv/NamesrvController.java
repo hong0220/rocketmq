@@ -61,15 +61,20 @@ public class NamesrvController {
     private FileWatchService fileWatchService;
 
     public NamesrvController(NamesrvConfig namesrvConfig, NettyServerConfig nettyServerConfig) {
+        // namesrv配置信息
         this.namesrvConfig = namesrvConfig;
+        // netty配置信息
         this.nettyServerConfig = nettyServerConfig;
         this.kvConfigManager = new KVConfigManager(this);
+        // 路由信息管理
         this.routeInfoManager = new RouteInfoManager();
+        // 监听客户端连接(Channel)的变化，通知RouteInfoManager检查broker是否有变化
         this.brokerHousekeepingService = new BrokerHousekeepingService(this);
         this.configuration = new Configuration(
             log,
             this.namesrvConfig, this.nettyServerConfig
         );
+        // namesrv配置信息持久化磁盘文件中
         this.configuration.setStorePathFromConfig(this.namesrvConfig, "configStorePath");
     }
 

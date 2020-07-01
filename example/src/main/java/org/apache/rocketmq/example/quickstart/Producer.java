@@ -33,6 +33,8 @@ public class Producer {
          */
         DefaultMQProducer producer = new DefaultMQProducer("please_rename_unique_group_name");
 
+        // 手动设置ip:port
+        producer.setNamesrvAddr("127.0.0.1:9876");
         /*
          * Specify name server addresses.
          * <p/>
