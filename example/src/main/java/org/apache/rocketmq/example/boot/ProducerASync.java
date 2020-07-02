@@ -13,7 +13,7 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 public class ProducerASync {
 
   public static void main(String[] args) throws MQClientException, UnsupportedEncodingException {
-    DefaultMQProducer producer = new DefaultMQProducer("test");
+    DefaultMQProducer producer = new DefaultMQProducer("test_producer");
     producer.setNamesrvAddr("127.0.0.1:9876");
     producer.start();
     Message msg = new Message("test_topic" /* Topic */,
