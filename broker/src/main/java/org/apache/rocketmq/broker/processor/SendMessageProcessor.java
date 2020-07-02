@@ -358,6 +358,7 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
             }
             putMessageResult = this.brokerController.getTransactionalMessageService().prepareMessage(msgInner);
         } else {
+            // 非事务消息
             putMessageResult = this.brokerController.getMessageStore().putMessage(msgInner);
         }
 
