@@ -27,11 +27,11 @@
     <!--To configure the check to report on the first instance in each file-->
     <module name="FileTabCharacter"/>
 
-    <!-- header -->
-    <module name="RegexpHeader">
-        <property name="header" value="/\*\nLicensed to the Apache Software Foundation*"/>
-        <property name="fileExtensions" value="java"/>
-    </module>
+    <!-- header文件头 -->
+<!--    <module name="RegexpHeader">-->
+<!--        <property name="header" value="/\*\nLicensed to the Apache Software Foundation*"/>-->
+<!--        <property name="fileExtensions" value="java"/>-->
+<!--    </module>-->
 
     <module name="RegexpHeader">
         <property name="header" value="#[\s]*Licensed to the Apache Software Foundation*"/>
@@ -133,7 +133,8 @@
             <property name="allowEmptyConstructors" value="true"/>
             <property name="allowEmptyMethods" value="true"/>
         </module>
-        <module name="Indentation"/>
+        <!--缩进-->
+<!--        <module name="Indentation"/>-->
         <module name="MethodParamPad"/>
         <module name="ParenPad"/>
         <module name="TypecastParenPad"/>

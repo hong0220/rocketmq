@@ -42,6 +42,8 @@ JAVA_OPT="${JAVA_OPT} -verbose:gc -Xloggc:/dev/shm/rmq_srv_gc.log -XX:+PrintGCDe
 JAVA_OPT="${JAVA_OPT} -XX:-OmitStackTraceInFastThrow"
 JAVA_OPT="${JAVA_OPT}  -XX:-UseLargePages"
 JAVA_OPT="${JAVA_OPT} -Djava.ext.dirs=${JAVA_HOME}/jre/lib/ext:${BASE_DIR}/lib"
+
+#开启远程调试
 #JAVA_OPT="${JAVA_OPT} -Xdebug -Xrunjdwp:transport=dt_socket,address=9555,server=y,suspend=n"
 JAVA_OPT="${JAVA_OPT} ${JAVA_OPT_EXT}"
 JAVA_OPT="${JAVA_OPT} -cp ${CLASSPATH}"
