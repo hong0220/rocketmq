@@ -8,8 +8,8 @@ bash tools.sh com.alibaba.rocketmq.example.quickstart.Consumer
 
 启动:
 cd bin
-./mqnamesrv
-./mqbroker -n localhost:9876
+nohup sh bin/mqnamesrv &
+nohup sh bin/mqbroker -n localhost:9876 &
 
 修改jvm内存，-server -Xms512m，防止OOM。
 runbroker.sh

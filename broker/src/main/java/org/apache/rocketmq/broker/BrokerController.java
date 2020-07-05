@@ -855,8 +855,10 @@ public class BrokerController {
             this.filterServerManager.start();
         }
 
+        // 向所有的NameSrv注册Broker信息
         this.registerBrokerAll(true, false, true);
 
+        // 周期性注册Broker信息
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
