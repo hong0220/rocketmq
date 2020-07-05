@@ -302,12 +302,15 @@ public class DefaultMessageStore implements MessageStore {
         }
     }
 
+
     public PutMessageResult putMessage(MessageExtBrokerInner msg) {
+        // MessageStore是否关闭
         if (this.shutdown) {
             log.warn("message store has shutdown, so putMessage is forbidden");
             return new PutMessageResult(PutMessageStatus.SERVICE_NOT_AVAILABLE, null);
         }
 
+        // Broker状态为Slave拒绝存储
         if (BrokerRole.SLAVE == this.messageStoreConfig.getBrokerRole()) {
             long value = this.printTimes.getAndIncrement();
             if ((value % 50000) == 0) {
