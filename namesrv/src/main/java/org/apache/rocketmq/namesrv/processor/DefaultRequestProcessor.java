@@ -222,14 +222,14 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
         }
 
         RegisterBrokerResult result = this.namesrvController.getRouteInfoManager().registerBroker(
-            requestHeader.getClusterName(),
-            requestHeader.getBrokerAddr(),
-            requestHeader.getBrokerName(),
-            requestHeader.getBrokerId(),
-            requestHeader.getHaServerAddr(),
-            registerBrokerBody.getTopicConfigSerializeWrapper(),
-            registerBrokerBody.getFilterServerList(),
-            ctx.channel());
+            requestHeader.getClusterName(), // 集群名称
+            requestHeader.getBrokerAddr(), // 地址
+            requestHeader.getBrokerName(), // broker名称
+            requestHeader.getBrokerId(), // brokerId(0 表示 Master，>0 表示 Slave)
+            requestHeader.getHaServerAddr(), // HA地址(主备通信交互，一般都是为broker的ip，端口+1)
+            registerBrokerBody.getTopicConfigSerializeWrapper(), // Topic配置(topic名称，读写队列数据，权限等信息)
+            registerBrokerBody.getFilterServerList(), // filterServerList
+            ctx.channel()); // channel
 
         responseHeader.setHaServerAddr(result.getHaServerAddr());
         responseHeader.setMasterAddr(result.getMasterAddr());

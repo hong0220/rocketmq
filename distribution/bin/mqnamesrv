@@ -17,11 +17,14 @@
 
 if [ -z "$ROCKETMQ_HOME" ] ; then
   ## resolve links - $0 may be a link to maven's home
+  # Shell本身的文件名
   PRG="$0"
 
   # need this for relative symlinks
   while [ -h "$PRG" ] ; do
+    # 是否是软连接
     ls=`ls -ld "$PRG"`
+    # 使用expr的模式匹配来获取连接文件的真实路径并赋值给PRG
     link=`expr "$ls" : '.*-> \(.*\)$'`
     if expr "$link" : '/.*' > /dev/null; then
       PRG="$link"
@@ -32,6 +35,7 @@ if [ -z "$ROCKETMQ_HOME" ] ; then
 
   saveddir=`pwd`
 
+  # 当前脚本所在路径上一层 /../distribution
   ROCKETMQ_HOME=`dirname "$PRG"`/..
 
   # make it fully qualified

@@ -121,7 +121,7 @@ public class NamesrvStartup {
 
         // 把命令行属性解析成properties
         MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), namesrvConfig);
-        // 解析 ROCKETMQ_HOME 环境变量
+        // 解析mqnamesrv，mqbroker配置文件 ROCKETMQ_HOME 变量
         if (null == namesrvConfig.getRocketmqHome()) {
             System.out.printf("Please set the %s variable in your environment to match the location of the RocketMQ installation%n", MixAll.ROCKETMQ_HOME_ENV);
             // 非正常退出
@@ -156,6 +156,7 @@ public class NamesrvStartup {
             throw new IllegalArgumentException("NamesrvController is null");
         }
 
+        // 初始化
         boolean initResult = controller.initialize();
         if (!initResult) {
             controller.shutdown();
