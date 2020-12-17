@@ -858,7 +858,7 @@ public class BrokerController {
         // 向所有的NameSrv注册Broker信息
         this.registerBrokerAll(true, false, true);
 
-        // 周期性注册Broker信息
+        // 周期性注册Broker信息，Broker服务器会每间隔30秒(不会低于10秒,高于60秒)向集群中的所有NameServer发送心跳包
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -931,6 +931,7 @@ public class BrokerController {
 
     private void doRegisterBrokerAll(boolean checkOrderConfig, boolean oneway,
         TopicConfigSerializeWrapper topicConfigWrapper) {
+
         List<RegisterBrokerResult> registerBrokerResultList = this.brokerOuterAPI.registerBrokerAll(
             this.brokerConfig.getBrokerClusterName(),
             this.getBrokerAddr(),

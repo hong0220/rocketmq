@@ -89,6 +89,7 @@ public class NamesrvController {
 
         this.registerProcessor();
 
+        // 每 10秒 会发起一次检测 broker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

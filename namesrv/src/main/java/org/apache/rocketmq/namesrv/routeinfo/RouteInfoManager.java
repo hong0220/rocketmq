@@ -420,11 +420,16 @@ public class RouteInfoManager {
         return null;
     }
 
+    /**
+     * 检测 broker 状态
+     */
     public void scanNotActiveBroker() {
+        // 遍历 broker 存活列表
         Iterator<Entry<String, BrokerLiveInfo>> it = this.brokerLiveTable.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, BrokerLiveInfo> next = it.next();
             long last = next.getValue().getLastUpdateTimestamp();
+            // 如果最后一次发送心跳包的时间超过 120秒，则认为 Broker 服务器不可用，将 Broker 从各种配置列表中移出
             if ((last + BROKER_CHANNEL_EXPIRED_TIME) < System.currentTimeMillis()) {
                 RemotingUtil.closeChannel(next.getValue().getChannel());
                 it.remove();

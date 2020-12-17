@@ -292,8 +292,8 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     }
 
     /**
-     * broker会有回查线程定时(默认1分钟)扫描每个存储事务状态的表格文件，如果是已经提交或者回滚的消息直接跳过，
-     * 如果是prepared状态则会向Producer发起CheckTransaction请求，
+     * broker会有回查线程定时(默认1分钟)扫描每个存储事务状态的表格文件，
+     * 如果是已经提交或者回滚的消息直接跳过，如果是prepared状态则会向Producer发起CheckTransaction请求，
      * Producer会调用DefaultMQProducerImpl.checkTransactionState()方法来处理broker的定时回调请求
      */
     @Override
@@ -1227,8 +1227,8 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
         try {
             // 结束事务
-            // sendResult包含事务消息ID,请求发往broker(mq server)去更新事务消息的最终状态
-            // 根据localTransactionState更新消息的最终状态
+            // sendResult包含事务消息ID,请求发往broker(mq server)去更新事务消息的最终状态,根据localTransactionState更新消息的最终状态
+            // 如果消息发送失败,要回调DefaultMQProducerImpl.checkTransactionState()方法
             this.endTransaction(sendResult, localTransactionState, localException);
         } catch (Exception e) {
             log.warn("local transaction execute " + localTransactionState + ", but end broker transaction failed", e);
