@@ -72,10 +72,12 @@ public class TransactionMQProducer extends DefaultMQProducer {
     @Override
     public TransactionSendResult sendMessageInTransaction(final Message msg,
         final Object arg) throws MQClientException {
+        // 检查transactionListener是否存在
         if (null == this.transactionListener) {
             throw new MQClientException("TransactionListener is null", null);
         }
 
+        // 发送事务消息，代码应该内聚在此类
         return this.defaultMQProducerImpl.sendMessageInTransaction(msg, null, arg);
     }
 

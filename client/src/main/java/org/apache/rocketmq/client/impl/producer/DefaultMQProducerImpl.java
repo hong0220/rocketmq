@@ -1173,6 +1173,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         Validators.checkMessage(msg, this.defaultMQProducer);
 
         SendResult sendResult = null;
+        // 打上事务消息相关的标记,区分普通消息和事务消息
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_TRANSACTION_PREPARED, "true");
         MessageAccessor.putProperty(msg, MessageConst.PROPERTY_PRODUCER_GROUP, this.defaultMQProducer.getProducerGroup());
         try {
@@ -1199,6 +1200,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         localTransactionState = localTransactionExecuter.executeLocalTransactionBranch(msg, arg);
                     } else if (transactionListener != null) {
                         log.debug("Used new transaction API");
+                        // 如果消息发送成功,处理与消息关联的本地事务单元
                         localTransactionState = transactionListener.executeLocalTransaction(msg, arg);
                     }
                     if (null == localTransactionState) {
@@ -1227,8 +1229,6 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
         try {
             // 结束事务
-            // sendResult包含事务消息ID,请求发往broker(mq server)去更新事务消息的最终状态,根据localTransactionState更新消息的最终状态
-            // 如果消息发送失败,要回调DefaultMQProducerImpl.checkTransactionState()方法
             this.endTransaction(sendResult, localTransactionState, localException);
         } catch (Exception e) {
             log.warn("local transaction execute " + localTransactionState + ", but end broker transaction failed", e);
@@ -1252,6 +1252,13 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         return send(msg, this.defaultMQProducer.getSendMsgTimeout());
     }
 
+    /**
+     * sendResult包含事务消息id,localTransactionState,根据LocalTransactionState更新消息的最终状态。
+     * 如果半消息发送失败或本地事务执行失败告诉broker删除半消息,LocalTransactionState.ROLLBACK_MESSAGE。
+     * 半消息发送成功且本地事务执行成功则告诉broker生效半消息,LocalTransactionState.COMMIT_MESSAGE。
+     * // todo
+     * 如果消息发送失败,回调DefaultMQProducerImpl.checkTransactionState()方法
+     */
     public void endTransaction(
         final SendResult sendResult,
         final LocalTransactionState localTransactionState,
