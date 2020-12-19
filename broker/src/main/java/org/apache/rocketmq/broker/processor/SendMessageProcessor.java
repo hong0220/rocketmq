@@ -62,7 +62,7 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
     }
 
     /**
-     * Broker接受消息处理
+     * Broker接收消息,存储消息
      */
     @Override
     public RemotingCommand processRequest(ChannelHandlerContext ctx,
