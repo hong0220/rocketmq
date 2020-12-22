@@ -75,9 +75,10 @@ public class NamesrvStartup {
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
         //PackageConflictDetect.detectFastjson();
 
-        // 构建命令行操作的指令
+        // 创建命令行操作的指令,定义 -h 和 -n 参数
         Options options = ServerUtil.buildCommandlineOptions(new Options());
-        // mqnamesrv:启动namesrv命令
+        // 根据Options和运行时参数args生成命令行对象
+        // buildCommandlineOptions定义-c参数(Name server config properties file)和-p参数(Print all config item)
         commandLine = ServerUtil.parseCmdLine("mqnamesrv", args, buildCommandlineOptions(options), new PosixParser());
         if (null == commandLine) {
             // 非正常退出
@@ -91,14 +92,17 @@ public class NamesrvStartup {
         // 设置 namesrv 服务端口
         nettyServerConfig.setListenPort(9876);
 
-        // c:指定启动的时候加载配置文件
+        // 读取命令行-c参数指定的配置文件
         if (commandLine.hasOption('c')) {
-            // 命令行启动指定配置文件，前面用c开头
             String file = commandLine.getOptionValue('c');
             if (file != null) {
+                // 将文件转成输入流
                 InputStream in = new BufferedInputStream(new FileInputStream(file));
                 properties = new Properties();
+                // 加载到属性对象
                 properties.load(in);
+
+                // 填充到namesrvConfig和nettyServerConfig
                 MixAll.properties2Object(properties, namesrvConfig);
                 MixAll.properties2Object(properties, nettyServerConfig);
 
@@ -121,7 +125,7 @@ public class NamesrvStartup {
 
         // 把命令行属性解析成properties
         MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), namesrvConfig);
-        // 解析mqnamesrv，mqbroker配置文件 ROCKETMQ_HOME 变量
+        // 解析mqnamesrv，mqbroker脚本文件中 ROCKETMQ_HOME 变量
         if (null == namesrvConfig.getRocketmqHome()) {
             System.out.printf("Please set the %s variable in your environment to match the location of the RocketMQ installation%n", MixAll.ROCKETMQ_HOME_ENV);
             // 非正常退出
@@ -140,7 +144,7 @@ public class NamesrvStartup {
         MixAll.printObjectProperties(log, namesrvConfig);
         MixAll.printObjectProperties(log, nettyServerConfig);
 
-        // 创建namesrv控制器
+        // 创建NamesrvController
         final NamesrvController controller = new NamesrvController(namesrvConfig, nettyServerConfig);
 
         // remember all configs to prevent discard
@@ -163,6 +167,7 @@ public class NamesrvStartup {
             System.exit(-3);
         }
 
+        // 注册一个钩子函数,用于JVM进程关闭时,优雅地释放netty服务、线程池等资源
         Runtime.getRuntime().addShutdownHook(new ShutdownHookThread(log, new Callable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -171,6 +176,7 @@ public class NamesrvStartup {
             }
         }));
 
+        // 启动NamesrvController
         controller.start();
 
         return controller;
