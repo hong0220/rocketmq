@@ -16,6 +16,7 @@
  */
 package org.apache.rocketmq.namesrv;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.rocketmq.common.namesrv.NamesrvConfig;
 import org.apache.rocketmq.remoting.netty.NettyServerConfig;
 import org.junit.After;
@@ -43,5 +44,23 @@ public class NameServerInstanceTest {
             nameSrvController.shutdown();
         }
         //maybe need to clean the file store. But we do not suggest deleting anything.
+    }
+
+
+    /**
+     * 测试是否能连接上namesrv
+     * telnet 127.0.0.1 9876
+     */
+    public static void main(String[] args) throws Exception {
+        NamesrvConfig namesrvConfig = new NamesrvConfig();
+
+        NettyServerConfig nettyServerConfig = new NettyServerConfig();
+        nettyServerConfig.setListenPort(9876);
+
+        NamesrvController namesrvController = new NamesrvController(namesrvConfig, nettyServerConfig);
+        namesrvController.initialize();
+        namesrvController.start();
+
+        Thread.sleep(DateUtils.MILLIS_PER_DAY);
     }
 }

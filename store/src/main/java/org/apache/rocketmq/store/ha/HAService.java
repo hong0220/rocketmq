@@ -40,6 +40,9 @@ import org.apache.rocketmq.remoting.common.RemotingUtil;
 import org.apache.rocketmq.store.CommitLog;
 import org.apache.rocketmq.store.DefaultMessageStore;
 
+/**
+ * 主从同步
+ */
 public class HAService {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
@@ -154,6 +157,8 @@ public class HAService {
     }
 
     /**
+     * 主服务器监听从服务器连接
+     *
      * Listens to slave connections to create {@link HAConnection}.
      */
     class AcceptSocketService extends ServiceThread {
@@ -248,6 +253,8 @@ public class HAService {
     }
 
     /**
+     * 主从同步通知类,实现同步复制和异步复制
+     *
      * GroupTransferService Service
      */
     class GroupTransferService extends ServiceThread {
@@ -323,6 +330,9 @@ public class HAService {
         }
     }
 
+    /**
+     * 从服务器连接主服务
+     */
     class HAClient extends ServiceThread {
         private static final int READ_MAX_BUFFER_SIZE = 1024 * 1024 * 4;
         private final AtomicReference<String> masterAddress = new AtomicReference<>();

@@ -28,12 +28,17 @@ import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.remoting.common.RemotingUtil;
 import org.apache.rocketmq.store.SelectMappedBufferResult;
 
+/**
+ * 主服务端HA连接对象的封装,当主服务器接收到从服务器发过来的消息后,会封装成一个HAConnection对象
+ */
 public class HAConnection {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
     private final HAService haService;
     private final SocketChannel socketChannel;
     private final String clientAddr;
+    // 主服务器写
     private WriteSocketService writeSocketService;
+    // 主服务器读
     private ReadSocketService readSocketService;
 
     private volatile long slaveRequestOffset = -1;
