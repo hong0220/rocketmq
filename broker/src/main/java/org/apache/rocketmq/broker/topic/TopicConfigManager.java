@@ -369,10 +369,13 @@ public class TopicConfigManager extends ConfigManager {
     }
 
     public void deleteTopicConfig(final String topic) {
+        // 删除缓存
         TopicConfig old = this.topicConfigTable.remove(topic);
         if (old != null) {
             log.info("delete topic config OK, topic: {}", old);
+            // 更新数据版本号
             this.dataVersion.nextVersion();
+            // 删除持久化文件中的topic
             this.persist();
         } else {
             log.warn("delete topic config failed, topic: {} not exists", topic);

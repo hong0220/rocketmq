@@ -906,6 +906,7 @@ public class DefaultMessageStore implements MessageStore {
 
     @Override
     public int cleanUnusedTopic(Set<String> topics) {
+        // 遍历缓存的消息队列
         Iterator<Entry<String, ConcurrentMap<Integer, ConsumeQueue>>> it = this.consumeQueueTable.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, ConcurrentMap<Integer, ConsumeQueue>> next = it.next();
@@ -914,14 +915,16 @@ public class DefaultMessageStore implements MessageStore {
             if (!topics.contains(topic) && !topic.equals(ScheduleMessageService.SCHEDULE_TOPIC)) {
                 ConcurrentMap<Integer, ConsumeQueue> queueTable = next.getValue();
                 for (ConsumeQueue cq : queueTable.values()) {
+                    // 消费队列销毁
                     cq.destroy();
                     log.info("cleanUnusedTopic: {} {} ConsumeQueue cleaned",
                         cq.getTopic(),
                         cq.getQueueId()
                     );
-
+                    // 删除消息队列
                     this.commitLog.removeQueueFromTopicQueueTable(cq.getTopic(), cq.getQueueId());
                 }
+                // topic所在的消息队列删除完毕后,删除消费队列所在的集合元素
                 it.remove();
 
                 log.info("cleanUnusedTopic: {},topic destroyed", topic);
