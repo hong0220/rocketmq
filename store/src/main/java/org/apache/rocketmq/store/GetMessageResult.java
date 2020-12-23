@@ -34,7 +34,7 @@ public class GetMessageResult {
     private long maxOffset;
 
     private int bufferTotalSize = 0;
-
+    // 默认消费者不会消费从服务器
     private boolean suggestPullingFromSlave = false;
 
     private int msgCount4Commercial = 0;

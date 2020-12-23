@@ -77,6 +77,7 @@ public class TopicConfigManager extends ConfigManager {
                     .getDefaultTopicQueueNums());
                 int perm = PermName.PERM_INHERIT | PermName.PERM_READ | PermName.PERM_WRITE;
                 topicConfig.setPerm(perm);
+                // TBW102保存到topicConfigTable
                 this.topicConfigTable.put(topicConfig.getTopicName(), topicConfig);
             }
         }
