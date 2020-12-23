@@ -208,7 +208,7 @@ public class DefaultMessageStore implements MessageStore {
      * @throws Exception
      */
     public void start() throws Exception {
-
+        // 写lock 文件,尝试获取lock文件锁,保证磁盘上的文件只会被一个messageStore读写
         lock = lockFile.getChannel().tryLock(0, 1, false);
         if (lock == null || lock.isShared() || !lock.isValid()) {
             throw new RuntimeException("Lock failed,MQ already started");
@@ -235,6 +235,7 @@ public class DefaultMessageStore implements MessageStore {
         this.haService.start();
 
         this.createTempFile();
+        // 启动定时任务
         this.addScheduleTask();
         this.shutdown = false;
     }
@@ -1381,6 +1382,8 @@ public class DefaultMessageStore implements MessageStore {
     }
 
     public void doDispatch(DispatchRequest req) {
+        // this.dispatcherList.addLast(new CommitLogDispatcherBuildConsumeQueue());
+        // this.dispatcherList.addLast(new CommitLogDispatcherBuildIndex());
         for (CommitLogDispatcher dispatcher : this.dispatcherList) {
             dispatcher.dispatch(req);
         }
@@ -1769,6 +1772,7 @@ public class DefaultMessageStore implements MessageStore {
                     break;
                 }
 
+                // 用偏移量reputFromOffset从commitlog读取
                 SelectMappedBufferResult result = DefaultMessageStore.this.commitLog.getData(reputFromOffset);
                 if (result != null) {
                     try {
@@ -1791,8 +1795,10 @@ public class DefaultMessageStore implements MessageStore {
                                             dispatchRequest.getBitMap(), dispatchRequest.getPropertiesMap());
                                     }
 
+                                    // 更新偏移量,下一次读取
                                     this.reputFromOffset += size;
                                     readSize += size;
+
                                     if (DefaultMessageStore.this.getMessageStoreConfig().getBrokerRole() == BrokerRole.SLAVE) {
                                         DefaultMessageStore.this.storeStatsService
                                             .getSinglePutMessageTopicTimesTotal(dispatchRequest.getTopic()).incrementAndGet();
@@ -1804,7 +1810,7 @@ public class DefaultMessageStore implements MessageStore {
                                     this.reputFromOffset = DefaultMessageStore.this.commitLog.rollNextFile(this.reputFromOffset);
                                     readSize = result.getSize();
                                 }
-                            } else if (!dispatchRequest.isSuccess()) {
+                            } else if (!dispatchRequest.isSuccess()) { // 失败处理
 
                                 if (size > 0) {
                                     log.error("[BUG]read total count not equals msg total size. reputFromOffset={}", reputFromOffset);
