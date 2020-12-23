@@ -261,9 +261,9 @@ public class PullMessageProcessor implements NettyRequestProcessor {
                     break;
             }
 
-            // 总开关
-            // slaveReadEnable=true,消息堆积量大于物理内存的40%
+            // 总开关slaveReadEnable=true
             if (this.brokerController.getBrokerConfig().isSlaveReadEnable()) {
+                // 消息堆积量大于物理内存的40%
                 // consume too slow ,redirect to another machine
                 if (getMessageResult.isSuggestPullingFromSlave()) {
                     // 设置从broker Id

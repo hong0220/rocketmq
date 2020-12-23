@@ -581,7 +581,7 @@ public class DefaultMessageStore implements MessageStore {
                         // StoreUtil.TOTAL_PHYSICAL_MEMORY_SIZE:当前系统物理内存
                         long memory = (long) (StoreUtil.TOTAL_PHYSICAL_MEMORY_SIZE
                             * (this.messageStoreConfig.getAccessMessageInMemoryMaxRatio() / 100.0));
-                        // 消息堆积量是否大于物理内存的40%
+                        // 消息堆积量是否大于物理内存的40%,开启开关suggestPullingFromSlave=true
                         getResult.setSuggestPullingFromSlave(diff > memory);
                     } finally {
 
