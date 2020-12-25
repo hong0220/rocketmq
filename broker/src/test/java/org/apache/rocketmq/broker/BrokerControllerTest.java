@@ -83,7 +83,7 @@ public class BrokerControllerTest {
         brokerController.initialize();
         brokerController.start();
 
-        System.out.println("broker启动 ");
+        System.out.println("broker启动");
 
         Thread.sleep(DateUtils.MILLIS_PER_DAY);
     }

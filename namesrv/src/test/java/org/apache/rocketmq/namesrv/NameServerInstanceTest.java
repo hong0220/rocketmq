@@ -61,6 +61,8 @@ public class NameServerInstanceTest {
         namesrvController.initialize();
         namesrvController.start();
 
+        System.out.println("namesrc启动");
+
         Thread.sleep(DateUtils.MILLIS_PER_DAY);
     }
 }

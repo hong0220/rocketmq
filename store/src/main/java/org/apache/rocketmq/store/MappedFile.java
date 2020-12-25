@@ -52,6 +52,7 @@ public class MappedFile extends ReferenceResource {
     //ADD BY ChenYang
     protected final AtomicInteger committedPosition = new AtomicInteger(0);
     private final AtomicInteger flushedPosition = new AtomicInteger(0);
+    // 文件大小,默认1G
     protected int fileSize;
     protected FileChannel fileChannel;
     /**
@@ -59,8 +60,11 @@ public class MappedFile extends ReferenceResource {
      */
     protected ByteBuffer writeBuffer = null;
     protected TransientStorePool transientStorePool = null;
+    // 文件名
     private String fileName;
+    // MappedFile文件记录第一条消息的全局物理偏移量,也是MappedFile的文件名
     private long fileFromOffset;
+    // 映射到文件系统中一个文件
     private File file;
     private MappedByteBuffer mappedByteBuffer;
     private volatile long storeTimestamp = 0;
@@ -202,14 +206,19 @@ public class MappedFile extends ReferenceResource {
         assert messageExt != null;
         assert cb != null;
 
+        // 获取当前文件已经写入到的位置
         int currentPos = this.wrotePosition.get();
 
+        // 如果当前文件未写满,则追加写消息
         if (currentPos < this.fileSize) {
+            // writeBuffer 或 mappedByteBuffer
             ByteBuffer byteBuffer = writeBuffer != null ? writeBuffer.slice() : this.mappedByteBuffer.slice();
+
             byteBuffer.position(currentPos);
             AppendMessageResult result = null;
             // 真正执行doAppend消息
             if (messageExt instanceof MessageExtBrokerInner) {
+                // 当前文件剩余容量:this.fileSize - currentPos
                 result = cb.doAppend(this.getFileFromOffset(), byteBuffer, this.fileSize - currentPos, (MessageExtBrokerInner) messageExt);
             } else if (messageExt instanceof MessageExtBatch) {
                 result = cb.doAppend(this.getFileFromOffset(), byteBuffer, this.fileSize - currentPos, (MessageExtBatch) messageExt);
