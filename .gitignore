@@ -15,5 +15,5 @@ localbin
 nohup.out
 
 
-/logs
-/storeOwn
+/data/logs
+/data/storeOwn

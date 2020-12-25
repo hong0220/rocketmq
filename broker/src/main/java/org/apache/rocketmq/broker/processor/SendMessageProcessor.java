@@ -62,7 +62,7 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
     }
 
     /**
-     * Broker接收消息,存储消息
+     * Broker接收，存储消息入口函数
      */
     @Override
     public RemotingCommand processRequest(ChannelHandlerContext ctx,
@@ -81,6 +81,7 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
                 this.executeSendMessageHookBefore(ctx, request, mqtraceContext);
 
                 RemotingCommand response;
+                // 批量消息
                 if (requestHeader.isBatch()) {
                     response = this.sendBatchMessage(ctx, request, mqtraceContext, requestHeader);
                 } else {
@@ -332,7 +333,7 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
             queueIdInt = Math.abs(this.random.nextInt() % 99999999) % topicConfig.getWriteQueueNums();
         }
 
-        // 将请求封装成内部消息结构
+        // 将请求封装成MessageExtBrokerInner
         MessageExtBrokerInner msgInner = new MessageExtBrokerInner();
         msgInner.setTopic(requestHeader.getTopic());
         msgInner.setQueueId(queueIdInt);
@@ -361,8 +362,8 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
                 return response;
             }
             putMessageResult = this.brokerController.getTransactionalMessageService().prepareMessage(msgInner);
-        } else {
-            // 非事务消息
+        } else { // 非事务消息处理
+            // 保存消息
             putMessageResult = this.brokerController.getMessageStore().putMessage(msgInner);
         }
 
