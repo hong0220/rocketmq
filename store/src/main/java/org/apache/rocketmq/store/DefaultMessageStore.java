@@ -303,15 +303,20 @@ public class DefaultMessageStore implements MessageStore {
         }
     }
 
-
+    /**
+     * 1.检查当前Broker是否可以存储消息
+     * 2.检查消息合法性
+     * 3.往commitLog存储消息
+     *
+     */
     public PutMessageResult putMessage(MessageExtBrokerInner msg) {
-        // 检查当前Broker是否可以存储消息
-        // 1.MessageStore是否关闭
+        // 1.检查当前Broker是否可以存储消息
+        // MessageStore是否关闭
         if (this.shutdown) {
             log.warn("message store has shutdown, so putMessage is forbidden");
             return new PutMessageResult(PutMessageStatus.SERVICE_NOT_AVAILABLE, null);
         }
-        // 2.Broker状态为Slave拒绝存储
+        // Broker状态为Slave拒绝存储
         if (BrokerRole.SLAVE == this.messageStoreConfig.getBrokerRole()) {
             long value = this.printTimes.getAndIncrement();
             if ((value % 50000) == 0) {
@@ -332,13 +337,13 @@ public class DefaultMessageStore implements MessageStore {
             this.printTimes.set(0);
         }
 
-        // 检查消息合法性
-        // 1.消息的topic长度是否超出限制
+        // 2.检查消息合法性
+        // 消息的topic长度是否超出限制
         if (msg.getTopic().length() > Byte.MAX_VALUE) {
             log.warn("putMessage message topic length too long " + msg.getTopic().length());
             return new PutMessageResult(PutMessageStatus.MESSAGE_ILLEGAL, null);
         }
-        // 2.消息的内容长度是否超出限制
+        // 消息的内容长度是否超出限制
         if (msg.getPropertiesString() != null && msg.getPropertiesString().length() > Short.MAX_VALUE) {
             log.warn("putMessage message properties length too long " + msg.getPropertiesString().length());
             return new PutMessageResult(PutMessageStatus.PROPERTIES_SIZE_EXCEEDED, null);
@@ -350,7 +355,7 @@ public class DefaultMessageStore implements MessageStore {
 
         long beginTime = this.getSystemClock().now();
 
-        // 往commitLog存储消息
+        // 3.往commitLog存储消息
         PutMessageResult result = this.commitLog.putMessage(msg);
 
         long eclipseTime = this.getSystemClock().now() - beginTime;

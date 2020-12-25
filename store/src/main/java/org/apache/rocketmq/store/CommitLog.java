@@ -526,6 +526,13 @@ public class CommitLog {
         return beginTimeInLock;
     }
 
+    /**
+     * 1.获取写锁,保证同一时刻只处理一条消息的存储操作
+     * 2.获取最后一个mappedFile,追加写消息到mappedFile文件
+     * 3.消息写入成功或失败处理
+     * 4.追加写消息结束释放写锁
+     * 5.返回结果标识
+     */
     public PutMessageResult putMessage(final MessageExtBrokerInner msg) {
         // Set the storage time
         msg.setStoreTimestamp(System.currentTimeMillis());
@@ -567,7 +574,7 @@ public class CommitLog {
         // 获取最后一个mappedFile
         MappedFile mappedFile = this.mappedFileQueue.getLastMappedFile();
 
-        // 获取写锁,保证同一时刻只处理一条消息的存储操作
+        // 1.获取写锁,保证同一时刻只处理一条消息的存储操作
         putMessageLock.lock(); //spin or ReentrantLock ,depending on store config
         try {
             long beginLockTimestamp = this.defaultMessageStore.getSystemClock().now();
@@ -586,8 +593,10 @@ public class CommitLog {
                 return new PutMessageResult(PutMessageStatus.CREATE_MAPEDFILE_FAILED, null);
             }
 
-            // 追加写消息到mappedFile文件
+            // 2.获取最后一个mappedFile,追加写消息到mappedFile文件
             result = mappedFile.appendMessage(msg, this.appendMessageCallback);
+
+            // 3.消息写入成功或失败处理
             switch (result.getStatus()) {
                 case PUT_OK:
                     break;
@@ -621,7 +630,7 @@ public class CommitLog {
             eclipseTimeInLock = this.defaultMessageStore.getSystemClock().now() - beginLockTimestamp;
             beginTimeInLock = 0;
         } finally {
-            // 追加写消息结束释放写锁
+            // 4.追加写消息结束释放写锁
             putMessageLock.unlock();
         }
 
@@ -633,6 +642,7 @@ public class CommitLog {
             this.defaultMessageStore.unlockMappedFile(unlockMappedFile);
         }
 
+        // 5.返回结果标识
         PutMessageResult putMessageResult = new PutMessageResult(PutMessageStatus.PUT_OK, result);
 
         // Statistics
@@ -1191,6 +1201,12 @@ public class CommitLog {
             return msgStoreItemMemory;
         }
 
+        /**
+         * 1.计算消息存储的各个属性
+         * 2.判断消息追加后是否超过单个MappedFile大小
+         * 3.序列化消息内容存储到内存缓存区中
+         * 4.返回结果标识
+         */
         public AppendMessageResult doAppend(final long fileFromOffset, final ByteBuffer byteBuffer, final int maxBlank,
             final MessageExtBrokerInner msgInner) {
             // STORETIMESTAMP + STOREHOSTADDRESS + OFFSET <br>
@@ -1232,7 +1248,7 @@ public class CommitLog {
              * Serialize message
              */
 
-            // 计算消息存储的各个属性
+            // 1.计算消息存储的各个属性
             final byte[] propertiesData =
                 msgInner.getPropertiesString() == null ? null : msgInner.getPropertiesString().getBytes(MessageDecoder.CHARSET_UTF8);
 
@@ -1255,7 +1271,7 @@ public class CommitLog {
                 return new AppendMessageResult(AppendMessageStatus.MESSAGE_SIZE_EXCEEDED);
             }
 
-            // 判断消息追加后是否超过单个MappedFile大小
+            // 2.判断消息追加后是否超过单个MappedFile大小
             // 如果超出,则返回状态码 AppendMessageStatus.END_OF_FILE
             // Determines whether there is sufficient free space
             if ((msgLen + END_FILE_MIN_BLANK_LENGTH) > maxBlank) {
@@ -1272,7 +1288,7 @@ public class CommitLog {
                     queueOffset, CommitLog.this.defaultMessageStore.now() - beginTimeMills);
             }
 
-            // 序列化消息内容存储到内存缓存区中
+            // 3.序列化消息内容存储到内存缓存区中
 
             // Initialization of storage space
             this.resetByteBuffer(msgStoreItemMemory, msgLen);
@@ -1323,7 +1339,7 @@ public class CommitLog {
             // Write messages to the queue buffer
             byteBuffer.put(this.msgStoreItemMemory.array(), 0, msgLen);
 
-            // 返回成功标识
+            // 4.返回结果标识
             AppendMessageResult result = new AppendMessageResult(AppendMessageStatus.PUT_OK, wroteOffset, msgLen, msgId,
                 msgInner.getStoreTimestamp(), queueOffset, CommitLog.this.defaultMessageStore.now() - beginTimeMills);
 
