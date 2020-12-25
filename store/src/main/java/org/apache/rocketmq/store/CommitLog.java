@@ -1231,6 +1231,8 @@ public class CommitLog {
             /**
              * Serialize message
              */
+
+            // 计算消息存储的各个属性
             final byte[] propertiesData =
                 msgInner.getPropertiesString() == null ? null : msgInner.getPropertiesString().getBytes(MessageDecoder.CHARSET_UTF8);
 
