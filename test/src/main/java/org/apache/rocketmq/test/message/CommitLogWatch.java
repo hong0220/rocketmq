@@ -6,18 +6,23 @@ import org.apache.rocketmq.common.message.MessageExt;
 
 public class CommitLogWatch {
 
+  /**
+   * 查看CommitLog文件
+   *
+   * 消息的主题，消息内容，MessageQueue ID，存储地址
+   */
   public static void main(String[] args) throws Exception {
     String filePath = "/Users/didi/Desktop/import/source/rocketmq/data/storeOwn/commitlog/00000000000000000000";
     ByteBuffer buffer = DataUtil.read(filePath);
     while (true) {
       MessageExt message = MessageDecoder.decode(buffer);
-      if (message.getBody() == null) {
+      if (message != null) {
         break;
       }
 
       System.out.println("主题:" + message.getTopic()
-          + ",消息:" + new String(message.getBody())
-          + ",队列ID:" + message.getQueueId()
+          + ",消息内容:" + new String(message.getBody())
+          + ",MessageQueue ID:" + message.getQueueId()
           + ",存储地址:" + message.getStoreHost());
     }
   }
