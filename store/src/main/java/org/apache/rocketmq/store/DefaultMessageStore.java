@@ -307,7 +307,6 @@ public class DefaultMessageStore implements MessageStore {
      * 1.检查当前Broker是否可以存储消息
      * 2.检查消息合法性
      * 3.往commitLog存储消息
-     *
      */
     public PutMessageResult putMessage(MessageExtBrokerInner msg) {
         // 1.检查当前Broker是否可以存储消息

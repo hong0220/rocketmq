@@ -38,7 +38,9 @@ import org.apache.rocketmq.remoting.netty.NettyServerConfig;
 import org.apache.rocketmq.remoting.netty.TlsSystemConfig;
 import org.apache.rocketmq.srvutil.FileWatchService;
 
-
+/**
+ * Namesrv核心控制器
+ */
 public class NamesrvController {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
 
@@ -89,7 +91,7 @@ public class NamesrvController {
 
         this.registerProcessor();
 
-        // 每 10秒 会发起一次检测 broker
+        // 路由删除：每10秒会发起一次检测broker,剔除不活跃的broker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

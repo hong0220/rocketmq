@@ -45,6 +45,9 @@ import org.apache.rocketmq.common.protocol.route.TopicRouteData;
 import org.apache.rocketmq.common.sysflag.TopicSysFlag;
 import org.apache.rocketmq.remoting.common.RemotingUtil;
 
+/**
+ * 路由信息表
+ */
 public class RouteInfoManager {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
     private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2;
@@ -421,19 +424,22 @@ public class RouteInfoManager {
     }
 
     /**
-     * 检测 broker 状态
+     * 路由删除：每10秒会发起一次检测broker,剔除不活跃的broker
      */
     public void scanNotActiveBroker() {
-        // 遍历 broker 存活列表
+        // 遍历broker存活列表
         Iterator<Entry<String, BrokerLiveInfo>> it = this.brokerLiveTable.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, BrokerLiveInfo> next = it.next();
             long last = next.getValue().getLastUpdateTimestamp();
-            // 如果最后一次发送心跳包的时间超过 120秒，则认为 Broker 服务器不可用，将 Broker 从各种配置列表中移出
+            // 如果最后一次发送心跳包的时间超过120秒，则认为broker服务器不可用，将broker从各种配置列表中移出
             if ((last + BROKER_CHANNEL_EXPIRED_TIME) < System.currentTimeMillis()) {
+                // 关闭broker对应的channel
                 RemotingUtil.closeChannel(next.getValue().getChannel());
                 it.remove();
                 log.warn("The broker channel expired, {} {}ms", next.getKey(), BROKER_CHANNEL_EXPIRED_TIME);
+                // 从brokerLiveTable,brokerAddrTable,topicQueueTable移除broker相关信息
+                // todo hongyihui
                 this.onChannelDestroy(next.getKey(), next.getValue().getChannel());
             }
         }

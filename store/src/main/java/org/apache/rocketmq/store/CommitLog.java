@@ -584,6 +584,9 @@ public class CommitLog {
             // global
             msg.setStoreTimestamp(beginLockTimestamp);
 
+            // 如果为空就创建一个commitLog对应的MappedFile文件,文件命名以实际以文件大小命名,
+            // 分别是00000000000000000000、00000000001073741824、00000000002147483648，
+            // 文件名之间差1G=1024*1024*1224B=1073741824,每个commitLog的MappedFile文件大小是1G,无法存入新消息就用填充字符填充到1G
             if (null == mappedFile || mappedFile.isFull()) {
                 mappedFile = this.mappedFileQueue.getLastMappedFile(0); // Mark: NewFile may be cause noise
             }

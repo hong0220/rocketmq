@@ -38,7 +38,7 @@ public class MappedFileQueue {
     private final String storePath;
     // MappedFile的大小
     private final int mappedFileSize;
-
+    // 存储顺序增长的MappedFile文件
     private final CopyOnWriteArrayList<MappedFile> mappedFiles = new CopyOnWriteArrayList<MappedFile>();
 
     private final AllocateMappedFileService allocateMappedFileService;
