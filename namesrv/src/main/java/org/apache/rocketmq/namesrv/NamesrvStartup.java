@@ -70,16 +70,24 @@ public class NamesrvStartup {
         return null;
     }
 
+    /**
+     * 根据配置文件创建namesrvConfig和nettyServerConfig,依靠这两个对象创建NamesrvController
+     */
     public static NamesrvController createNamesrvController(String[] args) throws IOException, JoranException {
         // 从系统文件中查询rocketmq版本
         System.setProperty(RemotingCommand.REMOTING_VERSION_KEY, Integer.toString(MQVersion.CURRENT_VERSION));
         //PackageConflictDetect.detectFastjson();
 
-        // 创建命令行操作的指令,定义 -h 和 -n 参数
+
+        // Apache Commons CLI 命令行解析工具构建命令
+
+        // 创建命令行操作命令：定义-h和-n参数
         Options options = ServerUtil.buildCommandlineOptions(new Options());
+
         // 根据Options和运行时参数args生成命令行对象
-        // buildCommandlineOptions定义-c参数(Name server config properties file)和-p参数(Print all config item)
+        // buildCommandlineOptions：定义-c参数(Name server config properties file)和-p参数(Print all config item)
         commandLine = ServerUtil.parseCmdLine("mqnamesrv", args, buildCommandlineOptions(options), new PosixParser());
+
         if (null == commandLine) {
             // 非正常退出
             System.exit(-1);
@@ -94,6 +102,7 @@ public class NamesrvStartup {
 
         // 读取命令行-c参数指定的配置文件
         if (commandLine.hasOption('c')) {
+            // 命令行启动namesrv -c指定的配置文件路径
             String file = commandLine.getOptionValue('c');
             if (file != null) {
                 // 将文件转成输入流
@@ -106,7 +115,7 @@ public class NamesrvStartup {
                 MixAll.properties2Object(properties, namesrvConfig);
                 MixAll.properties2Object(properties, nettyServerConfig);
 
-                // 设置命令行启动namesrv指定的配置文件路径
+                // 设置配置文件路径
                 namesrvConfig.setConfigStorePath(file);
 
                 System.out.printf("load config properties file OK, %s%n", file);
@@ -125,7 +134,7 @@ public class NamesrvStartup {
 
         // 把命令行属性解析成properties
         MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), namesrvConfig);
-        // 解析mqnamesrv，mqbroker脚本文件中 ROCKETMQ_HOME 变量
+        // 解析mqnamesrv，mqbroker脚本文件中ROCKETMQ_HOME变量
         if (null == namesrvConfig.getRocketmqHome()) {
             System.out.printf("Please set the %s variable in your environment to match the location of the RocketMQ installation%n", MixAll.ROCKETMQ_HOME_ENV);
             // 非正常退出
@@ -148,7 +157,7 @@ public class NamesrvStartup {
         final NamesrvController controller = new NamesrvController(namesrvConfig, nettyServerConfig);
 
         // remember all configs to prevent discard
-        // 把配置文件配置值的属性值注册到NamesrvController
+        // 把配置文件配置值的属性值注册到NamesrvController,防止丢失
         controller.getConfiguration().registerConfig(properties);
 
         return controller;
