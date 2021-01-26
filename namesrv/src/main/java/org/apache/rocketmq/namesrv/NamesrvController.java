@@ -81,9 +81,10 @@ public class NamesrvController {
     }
 
     public boolean initialize() {
-
+        // 加载kv配置
         this.kvConfigManager.load();
 
+        // 创建NettyRemotingServer
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
 
         this.remotingExecutor =
@@ -100,6 +101,7 @@ public class NamesrvController {
             }
         }, 5, 10, TimeUnit.SECONDS);
 
+        // 定时任务：每10分钟打印kv配置
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
