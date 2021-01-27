@@ -1,0 +1,29 @@
+@startuml
+
+NamesrvStartup -> NamesrvStartup.createNamesrvController: 创建NamesrvController
+
+NamesrvStartup.createNamesrvController -> NamesrvStartup.createNamesrvController: 创建NamesrvConfig
+
+NamesrvStartup.createNamesrvController -> NamesrvStartup.createNamesrvController: 创建NettyServerConfig
+
+NamesrvStartup.createNamesrvController -> NamesrvStartup.createNamesrvController: 创建NamesrvController
+
+NamesrvStartup -> NamesrvStartup.start
+
+NamesrvStartup.start -> NamesrvController.initialize: 初始化NamesrvController
+
+NamesrvController.initialize -> NamesrvController.initialize: 加载kv配置 kvConfigManager.load()
+
+NamesrvController.initialize -> NamesrvController.initialize: 创建NettyRemotingServer
+
+NamesrvController.initialize -> NamesrvController.initialize: 路由删除：定时任务,每10秒会发起一次检测broker,剔除不活跃的broker
+
+NamesrvController.initialize -> NamesrvController.initialize: 定时任务,每10分钟打印kv配置
+
+NamesrvStartup.start -> NamesrvStartup.start: 注册一个钩子函数,用于JVM进程关闭时,优雅地释放netty服务、线程池等资源
+
+NamesrvStartup.start -> NamesrvController.start: 启动NamesrvController
+
+NamesrvController.start -> NettyRemotingServer.start: 启动netty服务
+
+@enduml

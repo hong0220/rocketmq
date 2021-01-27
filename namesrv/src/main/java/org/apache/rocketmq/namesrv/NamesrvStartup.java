@@ -71,7 +71,7 @@ public class NamesrvStartup {
     }
 
     /**
-     * 根据配置文件创建namesrvConfig和nettyServerConfig,依靠这两个对象创建NamesrvController
+     * 根据配置文件创建namesrvConfig和nettyServerConfig,进而创建NamesrvController
      */
     public static NamesrvController createNamesrvController(String[] args) throws IOException, JoranException {
         // 从系统文件中查询rocketmq版本

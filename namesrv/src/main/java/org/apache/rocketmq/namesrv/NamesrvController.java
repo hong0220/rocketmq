@@ -92,7 +92,7 @@ public class NamesrvController {
 
         this.registerProcessor();
 
-        // 路由删除：每10秒会发起一次检测broker,剔除不活跃的broker
+        // 路由删除：定时任务,每10秒会发起一次检测broker,剔除不活跃的broker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -101,7 +101,7 @@ public class NamesrvController {
             }
         }, 5, 10, TimeUnit.SECONDS);
 
-        // 定时任务：每10分钟打印kv配置
+        // 定时任务,每10分钟打印kv配置
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -163,6 +163,7 @@ public class NamesrvController {
     }
 
     public void start() throws Exception {
+        // 启动netty服务
         this.remotingServer.start();
 
         if (this.fileWatchService != null) {
