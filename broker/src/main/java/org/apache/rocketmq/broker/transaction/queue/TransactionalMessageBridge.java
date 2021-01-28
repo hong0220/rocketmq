@@ -198,7 +198,7 @@ public class TransactionalMessageBridge {
         msgInner.setSysFlag(
             MessageSysFlag.resetTransactionValue(msgInner.getSysFlag(), MessageSysFlag.TRANSACTION_NOT_TYPE));
 
-        // 所有的事务半消息都会被放进同一个topic的同一个queue,通过对topic的区分避免半消息被consumer消费到。
+        // 所有的事务消息都会被放进同一个topic的同一个queue,通过对topic的区分避免半消息被consumer消费到。
         // RMQ_SYS_TRANS_HALF_TOPIC
         msgInner.setTopic(TransactionalMessageUtil.buildHalfTopic());
         // queueId设置为0
@@ -210,7 +210,9 @@ public class TransactionalMessageBridge {
     public boolean putOpMessage(MessageExt messageExt, String opType) {
         MessageQueue messageQueue = new MessageQueue(messageExt.getTopic(),
             this.brokerController.getBrokerConfig().getBrokerName(), messageExt.getQueueId());
+
         if (TransactionalMessageUtil.REMOVETAG.equals(opType)) {
+            // 事务消息提交或回滚时添加删除标记
             return addRemoveTagInTransactionOp(messageExt, messageQueue);
         }
         return true;
@@ -323,6 +325,8 @@ public class TransactionalMessageBridge {
         if (opQueue == null) {
             opQueue = new MessageQueue(TransactionalMessageUtil.buildOpTopic(), mq.getBrokerName(), mq.getQueueId());
         }
+
+        // 存储消息
         putMessage(makeOpMessageInner(message, opQueue));
     }
 
