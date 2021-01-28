@@ -564,7 +564,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                             break;
                         }
 
-                        // 将消息发送到该队列上去
+                        // 发送消息到该队列上
                         sendResult = this.sendKernelImpl(msg, mq, communicationMode, sendCallback, topicPublishInfo, timeout - costTime);
                         endTimestamp = System.currentTimeMillis();
                         this.updateFaultItem(mq.getBrokerName(), endTimestamp - beginTimestampPrev, false);

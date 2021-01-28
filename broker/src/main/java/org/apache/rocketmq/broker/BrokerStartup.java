@@ -110,13 +110,16 @@ public class BrokerStartup {
                 System.exit(-1);
             }
 
+            // 封装Broker配置信息
             final BrokerConfig brokerConfig = new BrokerConfig();
+            // 封装作为消息队列服务器的配置信息
             final NettyServerConfig nettyServerConfig = new NettyServerConfig();
+            // 封装作为NameServer客户端配置信息
             final NettyClientConfig nettyClientConfig = new NettyClientConfig();
             nettyClientConfig.setUseTLS(Boolean.parseBoolean(System.getProperty(TLS_ENABLE,
                 String.valueOf(TlsSystemConfig.tlsMode == TlsMode.ENFORCING))));
             nettyServerConfig.setListenPort(10911);
-
+            // 封装存储系统的配置信息
             final MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
 
             if (BrokerRole.SLAVE == messageStoreConfig.getBrokerRole()) {

@@ -32,6 +32,7 @@ public class ThreadLocalIndex {
             this.threadLocalIndex.set(index);
         }
 
+        // 自增,为下一次取值赋值
         index = Math.abs(index + 1);
         if (index < 0)
             index = 0;

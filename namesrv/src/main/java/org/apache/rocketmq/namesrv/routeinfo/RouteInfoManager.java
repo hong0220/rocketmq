@@ -104,7 +104,7 @@ public class RouteInfoManager {
     }
 
     /**
-     * 注册Broker信息
+     * 注册broker信息
      */
     public RegisterBrokerResult registerBroker(
         final String clusterName,
@@ -153,6 +153,7 @@ public class RouteInfoManager {
                     }
                 }
 
+                // 注册broker信息
                 BrokerLiveInfo prevBrokerLiveInfo = this.brokerLiveTable.put(brokerAddr,
                     new BrokerLiveInfo(
                         System.currentTimeMillis(),

@@ -76,6 +76,7 @@ public class TopicPublishInfo {
                 if (pos < 0)
                     pos = 0;
                 MessageQueue mq = this.messageQueueList.get(pos);
+                // 选择的队列所在的broker和上一次选择失败的broker不一样
                 if (!mq.getBrokerName().equals(lastBrokerName)) {
                     return mq;
                 }
