@@ -81,6 +81,7 @@ public class TransactionalMessageServiceImpl implements TransactionalMessageServ
 
     private boolean needSkip(MessageExt msgExt) {
         long valueOfCurrentMinusBorn = System.currentTimeMillis() - msgExt.getBornTimestamp();
+        // 超过72小时的事务消息跳过
         if (valueOfCurrentMinusBorn
             > transactionalMessageBridge.getBrokerController().getMessageStoreConfig().getFileReservedTime()
             * 3600L * 1000) {
@@ -130,7 +131,9 @@ public class TransactionalMessageServiceImpl implements TransactionalMessageServ
                 log.warn("The queue of topic is empty :" + topic);
                 return;
             }
+
             log.info("Check topic={}, queues={}", topic, msgQueues);
+
             for (MessageQueue messageQueue : msgQueues) {
                 long startTime = System.currentTimeMillis();
                 MessageQueue opQueue = getOpQueue(messageQueue);
@@ -151,6 +154,7 @@ public class TransactionalMessageServiceImpl implements TransactionalMessageServ
                         messageQueue, halfOffset, opOffset);
                     continue;
                 }
+
                 // single thread
                 int getMessageNullCount = 1;
                 long newOffset = halfOffset;
@@ -183,6 +187,7 @@ public class TransactionalMessageServiceImpl implements TransactionalMessageServ
                             }
                         }
 
+                        // 对半事务消息进行过滤操作
                         if (needDiscard(msgExt, transactionCheckMax) || needSkip(msgExt)) {
                             listener.resolveDiscardMsg(msgExt);
                             newOffset = i + 1;
@@ -223,6 +228,7 @@ public class TransactionalMessageServiceImpl implements TransactionalMessageServ
                             if (!putBackHalfMsgQueue(msgExt, i)) {
                                 continue;
                             }
+                            // 开启一个线程,发送事务消息回查请求
                             listener.resolveHalfMsg(msgExt);
                         } else {
                             pullResult = fillOpRemoveMap(removeMap, opQueue, pullResult.getNextBeginOffset(), halfOffset, doneOpOffset);

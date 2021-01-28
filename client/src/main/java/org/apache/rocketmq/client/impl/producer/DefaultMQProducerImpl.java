@@ -292,13 +292,12 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     }
 
     /**
-     * broker会有回查线程定时(默认1分钟)扫描每个存储事务状态的表格文件，
-     * 如果是已经提交或者回滚的消息直接跳过，如果是prepared状态则会向Producer发起CheckTransaction请求，
-     * Producer会调用DefaultMQProducerImpl.checkTransactionState()方法来处理broker的定时回调请求
+     * 处理broker的定时回调请求
      */
     @Override
     public void checkTransactionState(final String addr, final MessageExt msg,
         final CheckTransactionStateRequestHeader header) {
+
         Runnable request = new Runnable() {
             private final String brokerAddr = addr;
             private final MessageExt message = msg;
@@ -314,7 +313,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                     Throwable exception = null;
                     try {
                         if (transactionCheckListener != null) {
-                            // 事务判断方法：回滚事务 or 继续执行事务
+                            // 根据本地事务执行情况对应是提交消息还是回滚消息
                             localTransactionState = transactionCheckListener.checkLocalTransactionState(message);
                         } else if (transactionListener != null) {
                             log.debug("Used new check API in transaction message");
@@ -327,7 +326,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         exception = e;
                     }
 
-                    // 更新broker消息的最终状态
+                    // 更新broker事务消息的最终状态
                     this.processTransactionState(
                         localTransactionState,
                         group,
@@ -1164,7 +1163,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     }
 
     /**
-     * 事务消息
+     * 事务消息,应该封装在TransactionMQProducer
      */
     public TransactionSendResult sendMessageInTransaction(final Message msg,
                                                           final LocalTransactionExecuter localTransactionExecuter, final Object arg)
@@ -1260,8 +1259,8 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
     /**
      * sendResult包含事务消息id,localTransactionState,根据LocalTransactionState更新消息的最终状态。
-     * 如果半消息发送失败或本地事务执行失败告诉broker删除半消息,LocalTransactionState.ROLLBACK_MESSAGE。
-     * 半消息发送成功且本地事务执行成功则告诉broker生效半消息,LocalTransactionState.COMMIT_MESSAGE。
+     * 如果半事务消息发送失败或本地事务执行失败告诉broker删除半事务消息,LocalTransactionState.ROLLBACK_MESSAGE。
+     * 半事务消息发送成功且本地事务执行成功则告诉broker生效半事务消息,LocalTransactionState.COMMIT_MESSAGE。
      * // todo
      * 如果消息发送失败,回调DefaultMQProducerImpl.checkTransactionState()方法
      */

@@ -187,6 +187,7 @@ public class TransactionalMessageBridge {
     }
 
     public PutMessageResult putHalfMessage(MessageExtBrokerInner messageInner) {
+        // 存储半事务消息
         return store.putMessage(parseHalfMessageInner(messageInner));
     }
 
@@ -198,8 +199,8 @@ public class TransactionalMessageBridge {
         msgInner.setSysFlag(
             MessageSysFlag.resetTransactionValue(msgInner.getSysFlag(), MessageSysFlag.TRANSACTION_NOT_TYPE));
 
-        // 所有的事务消息都会被放进同一个topic的同一个queue,通过对topic的区分避免半消息被consumer消费到。
-        // RMQ_SYS_TRANS_HALF_TOPIC
+        // 所有的半事务消息都会被放进同一个topic的同一个queue，通过对topic的区分避免半事务消息被consumer消费到。
+        // 半事务消息：MixAll.RMQ_SYS_TRANS_HALF_TOPIC
         msgInner.setTopic(TransactionalMessageUtil.buildHalfTopic());
         // queueId设置为0
         msgInner.setQueueId(0);
