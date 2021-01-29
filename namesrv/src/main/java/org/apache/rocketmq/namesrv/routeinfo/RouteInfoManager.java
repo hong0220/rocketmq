@@ -53,10 +53,15 @@ public class RouteInfoManager {
     private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
+    // 保存topic在每个broker上的读写Queue的个数和读写权限
     private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;
+    // 注册到nameserv上的所有Broker，按照brokername分组
     private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;
+    // broker集群对应关系
     private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;
+    // broker最新心跳时间和配置版本号
     private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable;
+    // broker和FilterServer的对应关系
     private final HashMap<String/* brokerAddr */, List<String>/* Filter Server */> filterServerTable;
 
     public RouteInfoManager() {

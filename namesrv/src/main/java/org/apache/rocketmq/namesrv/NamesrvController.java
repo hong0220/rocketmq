@@ -67,6 +67,7 @@ public class NamesrvController {
         this.namesrvConfig = namesrvConfig;
         // netty配置信息
         this.nettyServerConfig = nettyServerConfig;
+
         this.kvConfigManager = new KVConfigManager(this);
         // 路由信息管理
         this.routeInfoManager = new RouteInfoManager();
@@ -90,6 +91,7 @@ public class NamesrvController {
         this.remotingExecutor =
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
 
+        // 注册DefaultRequestProcessor，所有的客户端请求DefaultRequestProcessor来处理
         this.registerProcessor();
 
         // 路由删除：定时任务,每10秒会发起一次检测broker,剔除不活跃的broker
@@ -110,6 +112,7 @@ public class NamesrvController {
             }
         }, 1, 10, TimeUnit.MINUTES);
 
+        // 监听ssl证书文件变化
         if (TlsSystemConfig.tlsMode != TlsMode.DISABLED) {
             // Register a listener to reload SslContext
             try {
@@ -153,11 +156,9 @@ public class NamesrvController {
 
     private void registerProcessor() {
         if (namesrvConfig.isClusterTest()) {
-
             this.remotingServer.registerDefaultProcessor(new ClusterTestRequestProcessor(this, namesrvConfig.getProductEnvName()),
                 this.remotingExecutor);
         } else {
-
             this.remotingServer.registerDefaultProcessor(new DefaultRequestProcessor(this), this.remotingExecutor);
         }
     }
