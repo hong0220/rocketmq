@@ -56,7 +56,9 @@ public class ClusterTestRequestProcessor extends DefaultRequestProcessor {
         final GetRouteInfoRequestHeader requestHeader =
             (GetRouteInfoRequestHeader) request.decodeCommandCustomHeader(GetRouteInfoRequestHeader.class);
 
+        // 从RouteInfoManager获取topic的路由信息
         TopicRouteData topicRouteData = this.namesrvController.getRouteInfoManager().pickupTopicRouteData(requestHeader.getTopic());
+        // 如果支持顺序消息，则填充KVConfig信息
         if (topicRouteData != null) {
             String orderTopicConf =
                 this.namesrvController.getKvConfigManager().getKVConfig(NamesrvUtil.NAMESPACE_ORDER_TOPIC_CONFIG,
