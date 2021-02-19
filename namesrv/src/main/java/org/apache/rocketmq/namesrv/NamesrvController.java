@@ -88,13 +88,14 @@ public class NamesrvController {
         // 创建NettyRemotingServer
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
 
+        // 客户端请求处理的线程池
         this.remotingExecutor =
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
 
         // 注册DefaultRequestProcessor，所有的客户端请求DefaultRequestProcessor来处理
         this.registerProcessor();
 
-        // 路由删除：定时任务,每10秒会发起一次检测broker,剔除不活跃的broker
+        // 路由删除：定时任务,每10秒扫描所有broker,剔除不活跃的broker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -167,6 +168,7 @@ public class NamesrvController {
         // 启动netty服务
         this.remotingServer.start();
 
+        // 监听ssl证书文件变化，可以实时更新证书
         if (this.fileWatchService != null) {
             this.fileWatchService.start();
         }

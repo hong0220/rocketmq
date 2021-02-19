@@ -580,17 +580,17 @@ public class DefaultMessageStore implements MessageStore {
 
                         nextBeginOffset = offset + (i / ConsumeQueue.CQ_STORE_UNIT_SIZE);
 
-                        // maxOffsetPy:当前最大物理偏移量
-                        // maxPhyOffsetPulling:本次消息拉取最大物理偏移量
-                        // diff:消息堆积量
+                        // maxOffsetPy：当前最大物理偏移量
+                        // maxPhyOffsetPulling：本次消息拉取最大物理偏移量
+                        // diff：未处理的消息总大小，即消息堆积量
                         long diff = maxOffsetPy - maxPhyOffsetPulling;
-                        // StoreUtil.TOTAL_PHYSICAL_MEMORY_SIZE:当前系统物理内存
+                        // StoreUtil.TOTAL_PHYSICAL_MEMORY_SIZE：当前系统物理内存
                         long memory = (long) (StoreUtil.TOTAL_PHYSICAL_MEMORY_SIZE
                             * (this.messageStoreConfig.getAccessMessageInMemoryMaxRatio() / 100.0));
-                        // 消息堆积量是否大于物理内存的40%,开启开关suggestPullingFromSlave=true
+
+                        // 消息堆积量是否大于物理内存的40%，开关suggestPullingFromSlave设置true
                         getResult.setSuggestPullingFromSlave(diff > memory);
                     } finally {
-
                         bufferConsumeQueue.release();
                     }
                 } else {

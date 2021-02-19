@@ -32,4 +32,8 @@ public class StoreUtil {
 
         return physicalTotal;
     }
+
+    public static void main(String[] args) {
+        System.out.println(TOTAL_PHYSICAL_MEMORY_SIZE);
+    }
 }

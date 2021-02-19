@@ -109,7 +109,7 @@ public class RouteInfoManager {
     }
 
     /**
-     * 注册broker信息
+     * 注册broker信息 todo hongyihui
      */
     public RegisterBrokerResult registerBroker(
         final String clusterName,
@@ -126,6 +126,7 @@ public class RouteInfoManager {
                 // 读写锁
                 this.lock.writeLock().lockInterruptibly();
 
+                // 更新clusterName和broker对应关系
                 Set<String> brokerNames = this.clusterAddrTable.get(clusterName);
                 if (null == brokerNames) {
                     brokerNames = new HashSet<String>();
@@ -134,7 +135,7 @@ public class RouteInfoManager {
                 brokerNames.add(brokerName);
 
                 boolean registerFirst = false;
-
+                // 更新brokerName和brokerdata的map
                 BrokerData brokerData = this.brokerAddrTable.get(brokerName);
                 if (null == brokerData) {
                     registerFirst = true;
@@ -144,6 +145,7 @@ public class RouteInfoManager {
                 String oldAddr = brokerData.getBrokerAddrs().put(brokerId, brokerAddr);
                 registerFirst = registerFirst || (null == oldAddr);
 
+                // 如果是master broker，第一次注册或topic信息发生变化，更新topicQueueTable
                 if (null != topicConfigWrapper
                     && MixAll.MASTER_ID == brokerId) {
                     if (this.isBrokerTopicConfigChanged(brokerAddr, topicConfigWrapper.getDataVersion())
@@ -158,7 +160,7 @@ public class RouteInfoManager {
                     }
                 }
 
-                // 注册broker信息
+                // 注册或更新broker信息：包括心跳时间
                 BrokerLiveInfo prevBrokerLiveInfo = this.brokerLiveTable.put(brokerAddr,
                     new BrokerLiveInfo(
                         System.currentTimeMillis(),
@@ -169,6 +171,7 @@ public class RouteInfoManager {
                     log.info("new broker registered, {} HAServer: {}", brokerAddr, haServerAddr);
                 }
 
+                // 更新filter server table
                 if (filterServerList != null) {
                     if (filterServerList.isEmpty()) {
                         this.filterServerTable.remove(brokerAddr);
@@ -177,6 +180,7 @@ public class RouteInfoManager {
                     }
                 }
 
+                // 如果是slave broker注册，如果master存在，则返回master broker信息
                 if (MixAll.MASTER_ID != brokerId) {
                     String masterAddr = brokerData.getBrokerAddrs().get(MixAll.MASTER_ID);
                     if (masterAddr != null) {
@@ -387,12 +391,15 @@ public class RouteInfoManager {
 
         try {
             try {
+                // 获取读锁
                 this.lock.readLock().lockInterruptibly();
+                // 获取topic对应的所有QueueData：brokerName，readQueueNums，writeQueueNums...
                 List<QueueData> queueDataList = this.topicQueueTable.get(topic);
                 if (queueDataList != null) {
                     topicRouteData.setQueueDatas(queueDataList);
                     foundQueueData = true;
 
+                    // 获取brokerName
                     Iterator<QueueData> it = queueDataList.iterator();
                     while (it.hasNext()) {
                         QueueData qd = it.next();
@@ -400,6 +407,7 @@ public class RouteInfoManager {
                     }
 
                     for (String brokerName : brokerNameSet) {
+                        // 根据brokerName获取broker主从地址信息
                         BrokerData brokerData = this.brokerAddrTable.get(brokerName);
                         if (null != brokerData) {
                             BrokerData brokerDataClone = new BrokerData(brokerData.getCluster(), brokerData.getBrokerName(), (HashMap<Long, String>) brokerData
@@ -430,7 +438,7 @@ public class RouteInfoManager {
     }
 
     /**
-     * 路由删除：每10秒会发起一次检测broker,剔除不活跃的broker
+     * 路由删除：定时任务,每10秒扫描所有broker,剔除不活跃的broker
      */
     public void scanNotActiveBroker() {
         // 遍历broker存活列表

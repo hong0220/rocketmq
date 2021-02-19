@@ -67,7 +67,7 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
     }
 
     /**
-     * Nameserv接收Broker请求
+     * Nameserv接收和处理请求
      */
     @Override
     public RemotingCommand processRequest(ChannelHandlerContext ctx,
@@ -79,7 +79,6 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
                 RemotingHelper.parseChannelRemoteAddr(ctx.channel()),
                 request);
         }
-
 
         switch (request.getCode()) {
             case RequestCode.PUT_KV_CONFIG:
@@ -101,14 +100,18 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
             // broker注销请求
             case RequestCode.UNREGISTER_BROKER:
                 return this.unregisterBroker(ctx, request);
+            // 根据topic获取broker路由信息
             case RequestCode.GET_ROUTEINTO_BY_TOPIC:
                 return this.getRouteInfoByTopic(ctx, request);
+            // 获取broker集群信息
             case RequestCode.GET_BROKER_CLUSTER_INFO:
                 return this.getBrokerClusterInfo(ctx, request);
             case RequestCode.WIPE_WRITE_PERM_OF_BROKER:
                 return this.wipeWritePermOfBroker(ctx, request);
+            // 获取所有topic信息
             case RequestCode.GET_ALL_TOPIC_LIST_FROM_NAMESERVER:
                 return getAllTopicListFromNameserver(ctx, request);
+            // 删除topic信息
             case RequestCode.DELETE_TOPIC_IN_NAMESRV:
                 return deleteTopicInNamesrv(ctx, request);
             case RequestCode.GET_KVLIST_BY_NAMESPACE:
@@ -202,6 +205,7 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
         final RegisterBrokerRequestHeader requestHeader =
             (RegisterBrokerRequestHeader) request.decodeCommandCustomHeader(RegisterBrokerRequestHeader.class);
 
+        // 检查CRC32是否相等
         if (!checksum(ctx, request, requestHeader)) {
             response.setCode(ResponseCode.SYSTEM_ERROR);
             response.setRemark("crc32 not match");
@@ -210,6 +214,7 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
 
         RegisterBrokerBody registerBrokerBody = new RegisterBrokerBody();
 
+        // 如果body已压缩，则先解压。如果body为空，将topic的版本号默认置为0
         if (request.getBody() != null) {
             try {
                 registerBrokerBody = RegisterBrokerBody.decode(request.getBody(), requestHeader.isCompressed());
@@ -221,6 +226,7 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
             registerBrokerBody.getTopicConfigSerializeWrapper().getDataVersion().setTimestamp(0);
         }
 
+        // 使用broker上报的信息更新nameserv的RouteInfo
         RegisterBrokerResult result = this.namesrvController.getRouteInfoManager().registerBroker(
             requestHeader.getClusterName(), // 集群名称
             requestHeader.getBrokerAddr(), // 地址
@@ -231,9 +237,11 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
             registerBrokerBody.getFilterServerList(), // filterServerList
             ctx.channel()); // channel
 
+        // 如果broker是slave，将ha server address和master address通过response返回给broker
         responseHeader.setHaServerAddr(result.getHaServerAddr());
         responseHeader.setMasterAddr(result.getMasterAddr());
 
+        // 将Order topic的KV配置信息通过response返回
         byte[] jsonValue = this.namesrvController.getKvConfigManager().getKVListByNamespace(NamesrvUtil.NAMESPACE_ORDER_TOPIC_CONFIG);
         response.setBody(jsonValue);
 
@@ -286,6 +294,7 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
         final RegisterBrokerRequestHeader requestHeader =
             (RegisterBrokerRequestHeader) request.decodeCommandCustomHeader(RegisterBrokerRequestHeader.class);
 
+        // 检查CRC32是否相等
         if (!checksum(ctx, request, requestHeader)) {
             response.setCode(ResponseCode.SYSTEM_ERROR);
             response.setRemark("crc32 not match");
@@ -340,7 +349,7 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
     }
 
     /**
-     * 查询路由信息
+     * 根据topic获取broker路由信息
      */
     public RemotingCommand getRouteInfoByTopic(ChannelHandlerContext ctx,
         RemotingCommand request) throws RemotingCommandException {
@@ -348,8 +357,9 @@ public class DefaultRequestProcessor implements NettyRequestProcessor {
         final GetRouteInfoRequestHeader requestHeader =
             (GetRouteInfoRequestHeader) request.decodeCommandCustomHeader(GetRouteInfoRequestHeader.class);
 
+        // 从RouteInfoManager获取topic的路由信息
         TopicRouteData topicRouteData = this.namesrvController.getRouteInfoManager().pickupTopicRouteData(requestHeader.getTopic());
-
+        // 如果支持顺序消息，则填充KVConfig信息
         if (topicRouteData != null) {
             if (this.namesrvController.getNamesrvConfig().isOrderMessageEnable()) {
                 String orderTopicConf =

@@ -115,7 +115,7 @@ public class PullAPIWrapper {
     }
 
     /**
-     * 当消费者收到拉取响应回来的数据后,会将下次建议拉取的brokerId缓存起来,
+     * 当消费者收到拉取响应回来的数据时,会将下次建议拉取的brokerId缓存起来,
      * 下次拉取消息从pullFromWhichNodeTable中取出brokerId。
      */
     public void updatePullFromWhichNode(final MessageQueue mq, final long brokerId) {
