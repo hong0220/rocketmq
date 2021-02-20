@@ -1,0 +1,53 @@
+version: '3'
+
+networks:
+  monitor:
+    driver: bridge
+
+services:
+  namesrv:
+    image: rocketmqinc/rocketmq:4.4.0
+    container_name: rmqnamesrv
+    ports:
+      - "9876:9876"
+    volumes:
+      - /Users/didi/Desktop/import/source/rocketmq/docker/namesrv/logs:/root/logs
+      - /Users/didi/Desktop/import/source/rocketmq/docker/namesrv/store:/root/store
+    environment:
+      - MAX_POSSIBLE_HEAP=100000000
+    command: sh mqnamesrv
+    networks:
+      - monitor
+
+  broker:
+    image: rocketmqinc/rocketmq:4.4.0
+    container_name: rmqbroker
+    ports:
+      - 10909:10909
+      - 10911:10911
+    volumes:
+      - /Users/didi/Desktop/import/source/rocketmq/docker/broker/logs:/root/logs
+      - /Users/didi/Desktop/import/source/rocketmq/docker/broker/store:/root/store
+      - /Users/didi/Desktop/import/source/rocketmq/distribution/conf/broker.conf:/opt/rocketmq-4.4.0/conf/broker.conf
+    environment:
+      - NAMESRV_ADDR=namesrv:9876
+      - MAX_POSSIBLE_HEAP=200000000
+    depends_on:
+      - namesrv
+    command: sh mqbroker -n namesrv:9876 -c /opt/rocketmq-4.4.0/conf/broker.conf
+    networks:
+      - monitor
+
+  console:
+    image: pangliang/rocketmq-console-ng
+    container_name: rocketmq-console-ng
+    restart: always
+    ports:
+      - 9999:8080
+    environment:
+      - JAVA_OPTS= -Dlogging.level.root=info -Drocketmq.namesrv.addr=namesrv:9876
+      - Dcom.rocketmq.sendMessageWithVIPChannel=false
+    depends_on:
+      - namesrv
+    networks:
+      - monitor
