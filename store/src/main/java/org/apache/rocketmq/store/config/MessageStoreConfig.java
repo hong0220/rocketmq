@@ -75,9 +75,12 @@ public class MessageStoreConfig {
     @ImportantField
     private String deleteWhen = "04";
     private int diskMaxUsedSpaceRatio = 75;
+
+    // 默认保存72小时，超过无论有没有消费都会丢弃
     // The number of hours to keep a log file before deleting it (in hours)
     @ImportantField
     private int fileReservedTime = 72;
+
     // Flow control for ConsumeQueue
     private int putMsgIndexHightWater = 600000;
     // The maximum size of a single log file,default is 512K

@@ -11,8 +11,8 @@ services:
     ports:
       - "9876:9876"
     volumes:
-      - /Users/didi/Desktop/import/source/rocketmq/docker/namesrv/logs:/root/logs
-      - /Users/didi/Desktop/import/source/rocketmq/docker/namesrv/store:/root/store
+      - ./docker/namesrv/logs:/root/logs
+      - ./docker/namesrv/store:/root/store
     environment:
       - MAX_POSSIBLE_HEAP=100000000
     command: sh mqnamesrv
@@ -26,9 +26,9 @@ services:
       - 10909:10909
       - 10911:10911
     volumes:
-      - /Users/didi/Desktop/import/source/rocketmq/docker/broker/logs:/root/logs
-      - /Users/didi/Desktop/import/source/rocketmq/docker/broker/store:/root/store
-      - /Users/didi/Desktop/import/source/rocketmq/distribution/conf/broker.conf:/opt/rocketmq-4.4.0/conf/broker.conf
+      - ./docker/broker/logs:/root/logs
+      - ./docker/broker/store:/root/store
+      - ./distribution/conf/broker.conf:/opt/rocketmq-4.4.0/conf/broker.conf
     environment:
       - NAMESRV_ADDR=namesrv:9876
       - MAX_POSSIBLE_HEAP=200000000

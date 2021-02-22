@@ -215,6 +215,11 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
     }
 
     /**
+     * 一些配置检查
+     * 构建和namesrv通信的netty客户端
+     * 默认每30s和namesrv交换获取broker相关信息
+     * 默认每30s去掉失效的broker信息，发送心跳到所有broker上
+     *
      * Start this producer instance.
      * </p>
      *
@@ -262,6 +267,8 @@ public class DefaultMQProducer extends ClientConfig implements MQProducer {
     }
 
     /**
+     * 同步发送消息
+     *
      * Send message in synchronous mode. This method returns only when the sending procedure totally completes.
      * </p>
      *

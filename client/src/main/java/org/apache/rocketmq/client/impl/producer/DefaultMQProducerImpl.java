@@ -90,6 +90,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     private final InternalLogger log = ClientLogger.getLog();
     private final Random random = new Random();
     private final DefaultMQProducer defaultMQProducer;
+    // topic路由信息
     private final ConcurrentMap<String/* topic */, TopicPublishInfo> topicPublishInfoTable =
         new ConcurrentHashMap<String, TopicPublishInfo>();
     private final ArrayList<SendMessageHook> sendMessageHookList = new ArrayList<SendMessageHook>();
@@ -189,6 +190,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         null);
                 }
 
+                // todo TBW102 ?
                 this.topicPublishInfoTable.put(this.defaultMQProducer.getCreateTopicKey(), new TopicPublishInfo());
 
                 if (startFactory) {
@@ -545,7 +547,10 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             MessageQueue mq = null;
             Exception exception = null;
             SendResult sendResult = null;
+
+            // 发送模式是sync会有3次，其他1次
             int timesTotal = communicationMode == CommunicationMode.SYNC ? 1 + this.defaultMQProducer.getRetryTimesWhenSendFailed() : 1;
+
             int times = 0;
             String[] brokersSent = new String[timesTotal];
             for (; times < timesTotal; times++) {
@@ -674,9 +679,9 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     }
 
     private TopicPublishInfo tryToFindTopicPublishInfo(final String topic) {
-        // 本地查表
+        // 本地缓存查找topic信息
         TopicPublishInfo topicPublishInfo = this.topicPublishInfoTable.get(topic);
-        // 本地缓存没有，向NameSrv发起请求，更新本地路由缓存
+        // 本地缓存没有topic信息，向NameSrv发起请求获取topic信息，更新本地缓存topic信息
         if (null == topicPublishInfo || !topicPublishInfo.ok()) {
             this.topicPublishInfoTable.putIfAbsent(topic, new TopicPublishInfo());
             this.mQClientFactory.updateTopicRouteInfoFromNameServer(topic);

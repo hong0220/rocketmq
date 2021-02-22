@@ -96,7 +96,7 @@ public class Validators {
             throw new MQClientException(ResponseCode.MESSAGE_ILLEGAL, "the message body length is zero");
         }
 
-        // body是否超长
+        // 消息内容不超过4M
         if (msg.getBody().length > defaultMQProducer.getMaxMessageSize()) {
             throw new MQClientException(ResponseCode.MESSAGE_ILLEGAL,
                 "the message body size over max value, MAX: " + defaultMQProducer.getMaxMessageSize());
@@ -111,16 +111,19 @@ public class Validators {
             throw new MQClientException("The specified topic is blank", null);
         }
 
+        // topic正则匹配：^[%|a-zA-Z0-9_-]+$
         if (!regularExpressionMatcher(topic, PATTERN)) {
             throw new MQClientException(String.format(
                 "The specified topic[%s] contains illegal characters, allowing only %s", topic,
                 VALID_PATTERN_STR), null);
         }
 
+        // topic长度不超过255
         if (topic.length() > CHARACTER_MAX_LENGTH) {
             throw new MQClientException("The specified topic is longer than topic max length 255.", null);
         }
 
+        // topic不是系统保留的TBW102
         //whether the same with system reserved keyword
         if (topic.equals(MixAll.AUTO_CREATE_TOPIC_KEY_TOPIC)) {
             throw new MQClientException(

@@ -158,6 +158,8 @@ public class DefaultMQPushConsumer extends ClientConfig implements MQPushConsume
     private int consumeThreadMin = 20;
 
     /**
+     * 最大消费线程数
+     *
      * Max consumer thread number
      */
     private int consumeThreadMax = 64;
