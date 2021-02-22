@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.rocketmq.example.simple;
+package org.apache.rocketmq.example.quickstart;
 
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.CountDownLatch;
@@ -26,11 +26,15 @@ import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.common.RemotingHelper;
 
+/**
+ * 异步消息
+ */
 public class AsyncProducer {
     public static void main(
         String[] args) throws MQClientException, InterruptedException, UnsupportedEncodingException {
 
         DefaultMQProducer producer = new DefaultMQProducer("Jodie_Daily_test");
+        producer.setNamesrvAddr("127.0.0.1:9876");
         producer.start();
         producer.setRetryTimesWhenSendAsyncFailed(0);
 

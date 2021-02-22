@@ -323,7 +323,7 @@ public class MQClientAPIImpl {
             case ONEWAY:
                 this.remotingClient.invokeOneway(addr, request, timeoutMillis);
                 return null;
-            case ASYNC:
+            case ASYNC: // 异步发送
                 final AtomicInteger times = new AtomicInteger();
                 long costTimeAsync = System.currentTimeMillis() - beginStartTime;
                 if (timeoutMillis < costTimeAsync) {
@@ -332,7 +332,7 @@ public class MQClientAPIImpl {
                 this.sendMessageAsync(addr, brokerName, msg, timeoutMillis - costTimeAsync, request, sendCallback, topicPublishInfo, instance,
                     retryTimesWhenSendFailed, times, context, producer);
                 return null;
-            case SYNC:
+            case SYNC: // 同步发送
                 long costTimeSync = System.currentTimeMillis() - beginStartTime;
                 if (timeoutMillis < costTimeSync) {
                     throw new RemotingTooMuchRequestException("sendMessage call timeout");
@@ -402,6 +402,7 @@ public class MQClientAPIImpl {
                         }
 
                         try {
+                            // 调用成功回调
                             sendCallback.onSuccess(sendResult);
                         } catch (Throwable e) {
                         }

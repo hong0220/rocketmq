@@ -31,17 +31,19 @@ public class SplitBatchProducer {
         DefaultMQProducer producer = new DefaultMQProducer("BatchProducerGroupName");
         producer.start();
 
-        //large batch
+        // large batch
         String topic = "BatchTest";
         List<Message> messages = new ArrayList<>(100 * 1000);
         for (int i = 0; i < 100 * 1000; i++) {
             messages.add(new Message(topic, "Tag", "OrderID" + i, ("Hello world " + i).getBytes()));
         }
 
-        //split the large batch into small ones:
+        // 批量发送消息太大，需要分割发送
+        // split the large batch into small ones:
         ListSplitter splitter = new ListSplitter(messages);
         while (splitter.hasNext()) {
             List<Message> listItem = splitter.next();
+            System.out.println(listItem.size());
             producer.send(listItem);
         }
     }

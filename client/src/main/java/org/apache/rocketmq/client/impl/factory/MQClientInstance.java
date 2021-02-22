@@ -232,13 +232,18 @@ public class MQClientInstance {
                     }
                     // Start request-response channel
                     this.mQClientAPIImpl.start();
+
+                    // 定时拉取NameServer Addr信息
                     // Start various schedule tasks
                     this.startScheduledTask();
+
                     // 消息拉取线程
                     // Start pull service
                     this.pullMessageService.start();
+
                     // Start rebalance service
                     this.rebalanceService.start();
+
                     // Start push service
                     this.defaultMQProducer.getDefaultMQProducerImpl().start(false);
                     log.info("the client factory [{}] start OK", this.clientId);

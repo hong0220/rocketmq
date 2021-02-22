@@ -174,6 +174,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             case CREATE_JUST:
                 this.serviceState = ServiceState.START_FAILED;
 
+                // 一些配置检查
                 this.checkConfig();
 
                 if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUCER_GROUP)) {
@@ -489,6 +490,8 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     public void send(final Message msg, final SendCallback sendCallback, final long timeout)
         throws MQClientException, RemotingException, InterruptedException {
         final long beginStartTime = System.currentTimeMillis();
+
+        // 异步提交给线程池
         ExecutorService executor = this.getAsyncSenderExecutor();
         try {
             executor.submit(new Runnable() {
@@ -499,6 +502,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         try {
                             sendDefaultImpl(msg, CommunicationMode.ASYNC, sendCallback, timeout - costTime);
                         } catch (Exception e) {
+                            // 调用失败回调
                             sendCallback.onException(e);
                         }
                     } else {
@@ -568,7 +572,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                             break;
                         }
 
-                        // 发送消息到该队列上
+                        // 发送消息到该消息队列上
                         sendResult = this.sendKernelImpl(msg, mq, communicationMode, sendCallback, topicPublishInfo, timeout - costTime);
                         endTimestamp = System.currentTimeMillis();
                         this.updateFaultItem(mq.getBrokerName(), endTimestamp - beginTimestampPrev, false);
