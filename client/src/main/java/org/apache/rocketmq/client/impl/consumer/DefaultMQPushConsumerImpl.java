@@ -615,7 +615,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                 // 启动ConsumeMessageService,负责消息消费
                 this.consumeMessageService.start();
 
-                // 向MQClientInstance注册MQConsumerInner
+                // 注册MQConsumerInner到MQClientInstance
                 boolean registerOK = mQClientFactory.registerConsumer(this.defaultMQPushConsumer.getConsumerGroup(), this);
                 if (!registerOK) {
                     this.serviceState = ServiceState.CREATE_JUST;

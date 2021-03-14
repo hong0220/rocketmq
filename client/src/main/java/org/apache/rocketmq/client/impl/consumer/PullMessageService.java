@@ -27,6 +27,9 @@ import org.apache.rocketmq.common.ServiceThread;
 import org.apache.rocketmq.logging.InternalLogger;
 import org.apache.rocketmq.common.utils.ThreadUtils;
 
+/**
+ * 消息拉取线程
+ */
 public class PullMessageService extends ServiceThread {
     private final InternalLogger log = ClientLogger.getLog();
     private final LinkedBlockingQueue<PullRequest> pullRequestQueue = new LinkedBlockingQueue<PullRequest>();
@@ -94,7 +97,7 @@ public class PullMessageService extends ServiceThread {
 
         while (!this.isStopped()) {
             try {
-                // 取不到消息阻塞,直到能获取消息
+                // 不断从pullRequestQueue队列中取PullRequest,如果没取到PullRequest,take方法会阻塞,直到有PullRequest可取
                 PullRequest pullRequest = this.pullRequestQueue.take();
                 this.pullMessage(pullRequest);
             } catch (InterruptedException ignored) {

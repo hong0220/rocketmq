@@ -52,6 +52,7 @@ public class LocalFileOffsetStore implements OffsetStore {
     public LocalFileOffsetStore(MQClientInstance mQClientFactory, String groupName) {
         this.mQClientFactory = mQClientFactory;
         this.groupName = groupName;
+        // 消息消费进度
         this.storePath = LOCAL_OFFSET_STORE_DIR + File.separator +
             this.mQClientFactory.getClientId() + File.separator +
             this.groupName + File.separator +
