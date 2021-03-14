@@ -95,9 +95,10 @@ public class PullMessageService extends ServiceThread {
     public void run() {
         log.info(this.getServiceName() + " service started");
 
+        // 不断从pullRequestQueue队列中取PullRequest
+        // 如果没取到PullRequest,take方法会阻塞,直到有PullRequest可取
         while (!this.isStopped()) {
             try {
-                // 不断从pullRequestQueue队列中取PullRequest,如果没取到PullRequest,take方法会阻塞,直到有PullRequest可取
                 PullRequest pullRequest = this.pullRequestQueue.take();
                 this.pullMessage(pullRequest);
             } catch (InterruptedException ignored) {
