@@ -615,7 +615,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                 // 启动ConsumeMessageService,负责消息消费
                 this.consumeMessageService.start();
 
-                // 向MQClientInstance注册MQConsumerInner
+                // 注册MQConsumerInner到MQClientInstance
                 boolean registerOK = mQClientFactory.registerConsumer(this.defaultMQPushConsumer.getConsumerGroup(), this);
                 if (!registerOK) {
                     this.serviceState = ServiceState.CREATE_JUST;
@@ -838,6 +838,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                 case BROADCASTING:
                     break;
                 case CLUSTERING:
+                    // 每个Consumer实例在启动时默认订阅该消费组的重试队列主题
                     final String retryTopic = MixAll.getRetryTopic(this.defaultMQPushConsumer.getConsumerGroup());
                     SubscriptionData subscriptionData = FilterAPI.buildSubscriptionData(this.defaultMQPushConsumer.getConsumerGroup(),
                         retryTopic, SubscriptionData.SUB_ALL);
