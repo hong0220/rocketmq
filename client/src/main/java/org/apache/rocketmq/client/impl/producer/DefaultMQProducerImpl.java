@@ -552,12 +552,13 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             Exception exception = null;
             SendResult sendResult = null;
 
-            // 发送模式是sync会有3次，其他1次
+            // 同步发送：sync重试3次，其他1次
             int timesTotal = communicationMode == CommunicationMode.SYNC ? 1 + this.defaultMQProducer.getRetryTimesWhenSendFailed() : 1;
 
             int times = 0;
             String[] brokersSent = new String[timesTotal];
             for (; times < timesTotal; times++) {
+                // 重试复用原来的MessageQueue
                 String lastBrokerName = null == mq ? null : mq.getBrokerName();
                 // 从路由信息中选择一个消息队列
                 MessageQueue mqSelected = this.selectOneMessageQueue(topicPublishInfo, lastBrokerName);

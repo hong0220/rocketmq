@@ -1840,6 +1840,13 @@ public class DefaultMessageStore implements MessageStore {
             }
         }
 
+        /**
+         * @desc:
+         * @author: hongyihui
+         * @date: 2021/4/23 上午11:10
+         * @param null
+         * @return:
+         */
         @Override
         public void run() {
             DefaultMessageStore.log.info(this.getServiceName() + " service started");

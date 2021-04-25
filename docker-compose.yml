@@ -8,6 +8,7 @@ services:
   namesrv:
     image: rocketmqinc/rocketmq:4.4.0
     container_name: rmqnamesrv
+    restart: always
     ports:
       - "9876:9876"
     volumes:
@@ -22,6 +23,7 @@ services:
   broker:
     image: rocketmqinc/rocketmq:4.4.0
     container_name: rmqbroker
+    restart: always
     ports:
       - 10909:10909
       - 10911:10911
