@@ -55,8 +55,12 @@ public class MQFaultStrategy {
         this.sendLatencyFaultEnable = sendLatencyFaultEnable;
     }
 
+    /**
+     * 基于Queue队列轮询算法和消息投递延迟最小的策略投递
+     */
     public MessageQueue selectOneMessageQueue(final TopicPublishInfo tpInfo, final String lastBrokerName) {
         // broker故障延迟机制开关
+        // 启用broker故障延迟机制
         if (this.sendLatencyFaultEnable) {
             try {
                 int index = tpInfo.getSendWhichQueue().getAndIncrement();
@@ -67,6 +71,7 @@ public class MQFaultStrategy {
                         pos = 0;
                     }
                     MessageQueue mq = tpInfo.getMessageQueueList().get(pos);
+                    // 验证该消息队列是否可用
                     if (latencyFaultTolerance.isAvailable(mq.getBrokerName())) {
                         // 重试复用原来的MessageQueue
                         if (null == lastBrokerName || mq.getBrokerName().equals(lastBrokerName)) {
@@ -75,9 +80,11 @@ public class MQFaultStrategy {
                     }
                 }
 
+                // 从延迟容错broker列表中挑选一个容错性最好的一个broker
                 final String notBestBroker = latencyFaultTolerance.pickOneAtLeast();
                 int writeQueueNums = tpInfo.getQueueIdByBroker(notBestBroker);
                 if (writeQueueNums > 0) {
+                    // 取余挑选其中一个队列
                     final MessageQueue mq = tpInfo.selectOneMessageQueue();
                     if (notBestBroker != null) {
                         mq.setBrokerName(notBestBroker);
@@ -94,6 +101,8 @@ public class MQFaultStrategy {
             return tpInfo.selectOneMessageQueue();
         }
 
+        // 默认逻辑
+        // 取余挑选一个队列
         return tpInfo.selectOneMessageQueue(lastBrokerName);
     }
 

@@ -174,15 +174,20 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             case CREATE_JUST:
                 this.serviceState = ServiceState.START_FAILED;
 
-                // 一些配置检查
+                // 一.判断生产者组名是否合法(特殊字符串，空，长度判断)
                 this.checkConfig();
 
                 if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUCER_GROUP)) {
+                    // 二.将默认的生产者实例名DEFAULT替换为进程pid
                     this.defaultMQProducer.changeInstanceNameToPID();
                 }
 
+                // 三.饿汉单例模式。
+                // 根据clientId获取对应MQClientInstance，同一个clientId的生产者复用同一个MQClientInstance。
+                // 同一个java应用中的多个DefaultMQProducerImpl复用一个MQClientInstance。
                 this.mQClientFactory = MQClientManager.getInstance().getAndCreateMQClientInstance(this.defaultMQProducer, rpcHook);
 
+                // 四.将生产者注册到MQClientInstance
                 boolean registerOK = mQClientFactory.registerProducer(this.defaultMQProducer.getProducerGroup(), this);
                 if (!registerOK) {
                     this.serviceState = ServiceState.CREATE_JUST;
@@ -191,10 +196,11 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         null);
                 }
 
-                // todo TBW102 ?
+                // todo hongyihui TBW102
                 this.topicPublishInfoTable.put(this.defaultMQProducer.getCreateTopicKey(), new TopicPublishInfo());
 
                 if (startFactory) {
+                    // 五.启动MQClientInstance
                     mQClientFactory.start();
                 }
 

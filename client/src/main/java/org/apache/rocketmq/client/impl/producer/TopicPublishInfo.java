@@ -87,7 +87,7 @@ public class TopicPublishInfo {
     }
 
     /**
-     * 通过轮询来获取一个消息队列
+     * 通过轮询来获取一个队列
      */
     public MessageQueue selectOneMessageQueue() {
         int index = this.sendWhichQueue.getAndIncrement();
