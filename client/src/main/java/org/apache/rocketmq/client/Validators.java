@@ -79,7 +79,7 @@ public class Validators {
      */
     public static void checkMessage(Message msg, DefaultMQProducer defaultMQProducer)
         throws MQClientException {
-        // 是否为null
+        // msg是否为null
         if (null == msg) {
             throw new MQClientException(ResponseCode.MESSAGE_ILLEGAL, "the message is null");
         }
@@ -87,16 +87,17 @@ public class Validators {
         // topic是否为空
         Validators.checkTopic(msg.getTopic());
 
-        // body是否为空
+        // 消息体body是否为空
         if (null == msg.getBody()) {
             throw new MQClientException(ResponseCode.MESSAGE_ILLEGAL, "the message body is null");
         }
 
+        // 消息体body是否为空
         if (0 == msg.getBody().length) {
             throw new MQClientException(ResponseCode.MESSAGE_ILLEGAL, "the message body length is zero");
         }
 
-        // 消息内容不超过4M
+        // 消息体body长度不超过4M
         if (msg.getBody().length > defaultMQProducer.getMaxMessageSize()) {
             throw new MQClientException(ResponseCode.MESSAGE_ILLEGAL,
                 "the message body size over max value, MAX: " + defaultMQProducer.getMaxMessageSize());

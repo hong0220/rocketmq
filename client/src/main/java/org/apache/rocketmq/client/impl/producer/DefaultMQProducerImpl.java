@@ -542,7 +542,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         // 检查Producer的状态是否是RUNNING
         this.makeSureStateOK();
 
-        // 检查msg是否合法
+        // 一.检查msg是否合法
         Validators.checkMessage(msg, this.defaultMQProducer);
 
         final long invokeID = random.nextLong();
@@ -550,7 +550,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         long beginTimestampPrev = beginTimestampFirst;
         long endTimestamp = beginTimestampFirst;
 
-        // 找到Topic对应的路由信息
+        // 二.获取topic的路由信息
         TopicPublishInfo topicPublishInfo = this.tryToFindTopicPublishInfo(msg.getTopic());
         if (topicPublishInfo != null && topicPublishInfo.ok()) {
             boolean callTimeout = false;
@@ -558,7 +558,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             Exception exception = null;
             SendResult sendResult = null;
 
-            // 同步发送：sync重试3次，其他1次
+            // 三.同步发送：sync重试3次，其他1次
             int timesTotal = communicationMode == CommunicationMode.SYNC ? 1 + this.defaultMQProducer.getRetryTimesWhenSendFailed() : 1;
 
             int times = 0;
@@ -566,7 +566,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             for (; times < timesTotal; times++) {
                 // 重试复用原来的MessageQueue
                 String lastBrokerName = null == mq ? null : mq.getBrokerName();
-                // 从路由信息中选择一个消息队列
+                // 四.从topic的路由信息中选择一个消息队列
                 MessageQueue mqSelected = this.selectOneMessageQueue(topicPublishInfo, lastBrokerName);
                 if (mqSelected != null) {
                     mq = mqSelected;
@@ -579,7 +579,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                             break;
                         }
 
-                        // 发送消息到该消息队列上
+                        // 五.发送消息到该消息队列上
                         sendResult = this.sendKernelImpl(msg, mq, communicationMode, sendCallback, topicPublishInfo, timeout - costTime);
                         endTimestamp = System.currentTimeMillis();
                         this.updateFaultItem(mq.getBrokerName(), endTimestamp - beginTimestampPrev, false);
