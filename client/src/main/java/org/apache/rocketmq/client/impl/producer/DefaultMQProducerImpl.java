@@ -183,8 +183,8 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                 }
 
                 // 三.饿汉单例模式。
-                // 根据clientId获取对应MQClientInstance，同一个clientId的生产者复用同一个MQClientInstance。
-                // 同一个java应用中的多个DefaultMQProducerImpl复用一个MQClientInstance。
+                // 通过clientId获取对应MQClientInstance，每个jvm进程对应一个clientId，一个clientId又对应一个MQClientInstance。
+                // 多个DefaultMQProducerImpl复用一个MQClientInstance。
                 this.mQClientFactory = MQClientManager.getInstance().getAndCreateMQClientInstance(this.defaultMQProducer, rpcHook);
 
                 // 四.将生产者注册到MQClientInstance
