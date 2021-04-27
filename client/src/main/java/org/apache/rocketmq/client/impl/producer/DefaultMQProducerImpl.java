@@ -170,7 +170,9 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     }
 
     public void start(final boolean startFactory) throws MQClientException {
+        // 服务状态
         switch (this.serviceState) {
+            // 刚创建
             case CREATE_JUST:
                 this.serviceState = ServiceState.START_FAILED;
 
@@ -704,7 +706,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         if (topicPublishInfo.isHaveTopicRouterInfo() || topicPublishInfo.ok()) {
             return topicPublishInfo;
         } else {
-            // topic获取不到，使用默认的topic(TBW102)去获取topic信息
+            // topic获取不到，使用默认的topic(TBW102)获取topic信息
             this.mQClientFactory.updateTopicRouteInfoFromNameServer(topic, true, this.defaultMQProducer);
             topicPublishInfo = this.topicPublishInfoTable.get(topic);
             return topicPublishInfo;
