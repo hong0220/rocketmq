@@ -25,12 +25,16 @@ import org.apache.rocketmq.common.protocol.route.TopicRouteData;
 
 public class TopicPublishInfo {
 
+    // 是否是顺序消息
     private boolean orderTopic = false;
 
+    // 是否包含路由信息
     private boolean haveTopicRouterInfo = false;
 
+    // topic对应的逻辑消息队列
     private List<MessageQueue> messageQueueList = new ArrayList<MessageQueue>();
-    // 基于线程上下文的计数递增,用于轮询
+
+    // 基于线程上下文的计数递增，用于选择消息队列轮询使用
     private volatile ThreadLocalIndex sendWhichQueue = new ThreadLocalIndex();
 
     private TopicRouteData topicRouteData;

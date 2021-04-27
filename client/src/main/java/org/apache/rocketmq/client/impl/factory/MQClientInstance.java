@@ -188,6 +188,7 @@ public class MQClientInstance {
             Collections.sort(qds);
             for (QueueData qd : qds) {
                 if (PermName.isWriteable(qd.getPerm())) {
+
                     BrokerData brokerData = null;
                     for (BrokerData bd : route.getBrokerDatas()) {
                         if (bd.getBrokerName().equals(qd.getBrokerName())) {
@@ -518,7 +519,7 @@ public class MQClientInstance {
     }
 
     /**
-     * 向namesrv发起请求获取topic信息
+     * 从namesrv获取topic信息，更新topic路由信息
      */
     public boolean updateTopicRouteInfoFromNameServer(final String topic) {
         return updateTopicRouteInfoFromNameServer(topic, false, null);
