@@ -95,7 +95,7 @@ public class NamesrvController {
         // 注册DefaultRequestProcessor，所有的客户端请求DefaultRequestProcessor来处理
         this.registerProcessor();
 
-        // 路由删除：定时任务,每10秒扫描所有broker,剔除不活跃的broker
+        // 路由删除：定时任务，每10秒扫描所有broker，剔除不活跃的broker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -104,7 +104,7 @@ public class NamesrvController {
             }
         }, 5, 10, TimeUnit.SECONDS);
 
-        // 定时任务,每10分钟打印kv配置
+        // 定时任务，每10分钟打印kv配置
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

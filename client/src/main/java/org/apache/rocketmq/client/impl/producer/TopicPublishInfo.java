@@ -36,7 +36,6 @@ public class TopicPublishInfo {
 
     // 基于线程上下文的计数递增，用于选择消息队列轮询使用
     private volatile ThreadLocalIndex sendWhichQueue = new ThreadLocalIndex();
-
     private TopicRouteData topicRouteData;
 
     public boolean isOrderTopic() {
