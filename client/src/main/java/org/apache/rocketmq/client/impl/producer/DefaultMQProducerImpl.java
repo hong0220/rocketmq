@@ -574,9 +574,10 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
             // 失败重试
             for (; times < timesTotal; times++) {
-                // 重试复用原来的MessageQueue
+                // 上次消息发送失败的borker名称
                 String lastBrokerName = null == mq ? null : mq.getBrokerName();
-                // 4.从topic的路由信息中选择一个消息队列
+
+                // 4.从topic的路由信息中选择一个消息队列，重试复用原来的MessageQueue
                 MessageQueue mqSelected = this.selectOneMessageQueue(topicPublishInfo, lastBrokerName);
                 if (mqSelected != null) {
                     mq = mqSelected;
@@ -589,7 +590,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                             break;
                         }
 
-                        // 5.发送消息到该消息队列上
+                        // 5.发送消息到消息队列
                         sendResult = this.sendKernelImpl(msg, mq, communicationMode, sendCallback, topicPublishInfo, timeout - costTime);
                         endTimestamp = System.currentTimeMillis();
                         this.updateFaultItem(mq.getBrokerName(), endTimestamp - beginTimestampPrev, false);
@@ -610,8 +611,12 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                                 break;
                         }
                     } catch (RemotingException e) {
+                        // 异常重试
                         endTimestamp = System.currentTimeMillis();
+
+                        // 更新borker故障容错信息，在broker故障容错机制中有用
                         this.updateFaultItem(mq.getBrokerName(), endTimestamp - beginTimestampPrev, true);
+
                         log.warn(String.format("sendKernelImpl exception, resend at once, InvokeID: %s, RT: %sms, Broker: %s", invokeID, endTimestamp - beginTimestampPrev, mq), e);
                         log.warn(msg.toString());
                         exception = e;
@@ -624,6 +629,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         exception = e;
                         continue;
                     } catch (MQBrokerException e) {
+                        // broker异常，根据异常code抛出不同异常
                         endTimestamp = System.currentTimeMillis();
                         this.updateFaultItem(mq.getBrokerName(), endTimestamp - beginTimestampPrev, true);
                         log.warn(String.format("sendKernelImpl exception, resend at once, InvokeID: %s, RT: %sms, Broker: %s", invokeID, endTimestamp - beginTimestampPrev, mq), e);
