@@ -694,14 +694,14 @@ public class DefaultMQProducerImpl implements MQProducerInner {
     }
 
     private TopicPublishInfo tryToFindTopicPublishInfo(final String topic) {
-        // 本地缓存查找topic信息
+        // 一.本地缓存查找topic信息
         TopicPublishInfo topicPublishInfo = this.topicPublishInfoTable.get(topic);
 
-        // 本地缓存没有topic信息，向namesrv发起请求获取topic信息，更新本地缓存topic信息
+        // 二.本地缓存没有topic信息，向namesrv发起请求获取topic信息，更新本地缓存topic信息
         if (null == topicPublishInfo || !topicPublishInfo.ok()) {
             this.topicPublishInfoTable.putIfAbsent(topic, new TopicPublishInfo());
 
-            // 从namesrv获取topic信息，更新topic路由信息
+            // 三.从namesrv获取topic信息，更新topic路由信息
             this.mQClientFactory.updateTopicRouteInfoFromNameServer(topic);
             topicPublishInfo = this.topicPublishInfoTable.get(topic);
         }
@@ -709,7 +709,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         if (topicPublishInfo.isHaveTopicRouterInfo() || topicPublishInfo.ok()) {
             return topicPublishInfo;
         } else {
-            // topic获取不到，使用默认的topic(TBW102)获取topic信息
+            // 四.topic获取不到，使用默认的topic(TBW102)获取topic信息
             this.mQClientFactory.updateTopicRouteInfoFromNameServer(topic, true, this.defaultMQProducer);
             topicPublishInfo = this.topicPublishInfoTable.get(topic);
             return topicPublishInfo;

@@ -639,6 +639,7 @@ public class MQClientInstance {
                         // 使用传入的topic获取topic信息
                         topicRouteData = this.mQClientAPIImpl.getTopicRouteInfoFromNameServer(topic, 1000 * 3);
                     }
+
                     if (topicRouteData != null) {
                         TopicRouteData old = this.topicRouteTable.get(topic);
                         // 和本地缓存topic信息对比，判断topic信息是否改变
@@ -661,11 +662,11 @@ public class MQClientInstance {
 
                             // Update Pub info
                             {
-                                // Queuedata根据其中写队列数量writeQueueNums转换成MessageQueue写队列
+                                // Queuedata根据其中写队列数量writeQueueNums转换成MessageQueue写队列，更新生产者的消息队列
+
                                 TopicPublishInfo publishInfo = topicRouteData2TopicPublishInfo(topic, topicRouteData);
                                 publishInfo.setHaveTopicRouterInfo(true);
 
-                                // 更新生产者的消息队列
                                 Iterator<Entry<String, MQProducerInner>> it = this.producerTable.entrySet().iterator();
                                 while (it.hasNext()) {
                                     Entry<String, MQProducerInner> entry = it.next();
@@ -678,10 +679,10 @@ public class MQClientInstance {
 
                             // Update sub info
                             {
-                                // Queuedata根据其中读队列数量readQueueNums转换成MessageQueue读队列
+                                // Queuedata根据其中读队列数量readQueueNums转换成MessageQueue读队列，更新消费者的消息队列
+
                                 Set<MessageQueue> subscribeInfo = topicRouteData2TopicSubscribeInfo(topic, topicRouteData);
 
-                                // 更新消费者的消息队列
                                 Iterator<Entry<String, MQConsumerInner>> it = this.consumerTable.entrySet().iterator();
                                 while (it.hasNext()) {
                                     Entry<String, MQConsumerInner> entry = it.next();
